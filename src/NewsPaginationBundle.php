@@ -9,10 +9,19 @@
 
 namespace HeimrichHannot\NewsPaginationBundle;
 
+use HeimrichHannot\NewsBundle\DependencyInjection\NewsPaginationExtension;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class NewsPaginationBundle extends Bundle
 {
     const CONTENT_ELEMENT_NEWS_PAGINATION_START = 'news_pagination_start';
     const CONTENT_ELEMENT_NEWS_PAGINATION_STOP  = 'news_pagination_stop';
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getContainerExtension()
+    {
+        return new NewsPaginationExtension();
+    }
 }
