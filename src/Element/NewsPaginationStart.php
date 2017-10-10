@@ -1,6 +1,6 @@
 <?php
 
-namespace HeimrichHannot\NewsPagination;
+namespace HeimrichHannot\NewsPaginationBundle;
 
 
 class NewsPaginationStart extends \ContentElement

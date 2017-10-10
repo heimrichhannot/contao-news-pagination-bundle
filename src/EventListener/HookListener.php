@@ -6,7 +6,7 @@ namespace HeimrichHannot\NewsPaginationBundle\EventListener;
 use HeimrichHannot\Request\Request;
 use Wa72\HtmlPageDom\HtmlPageCrawler;
 
-class Hooks extends \Controller
+class HookListener extends \Controller
 {
     static $arrTags = [
         'p',
