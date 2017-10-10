@@ -16,7 +16,7 @@ class Plugin implements BundlePluginInterface
     {
         return [
             BundleConfig::create('HeimrichHannot\NewsPaginationBundle\HeimrichHannotContaoNewsPaginationBundle')
-                ->setLoadAfter(ContaoNewsBundle::class)
+                ->setLoadAfter([ContaoNewsBundle::class])
         ];
     }
 }
