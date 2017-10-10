@@ -15,7 +15,7 @@ class Plugin implements BundlePluginInterface
     public function getBundles(ParserInterface $parser)
     {
         return [
-            BundleConfig::create('HeimrichHannot\NewsPaginationBundle\HeimrichHannotNewsPaginationBundle')
+            BundleConfig::create('HeimrichHannot\NewsPaginationBundle\HeimrichHannotContaoNewsPaginationBundle')
                 ->setLoadAfter(ContaoNewsBundle::class)
         ];
     }
