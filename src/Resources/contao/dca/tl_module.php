@@ -12,19 +12,20 @@ $arrDca['palettes']['newsreader'] =
  * Subpalettes
  */
 $arrDca['palettes']['__selector__'][]   = 'addPagination';
-$arrDca['subpalettes']['addPagination'] = 'paginationMaxCharCount,paginationParentCssSelector,paginationCeTextCssSelector';
+$arrDca['subpalettes']['addPagination'] = 'paginationMaxCharCount,avoidTrailingHeadlines,paginationCeTextCssSelector';
 
 /**
  * Fields
  */
 $arrFields = [
-    'addManualPagination'         => [
-        'label'     => &$GLOBALS['TL_LANG']['tl_module']['addManualPagination'],
-        'exclude'   => true,
-        'inputType' => 'checkbox',
-        'eval'      => ['tl_class' => 'w50'],
-        'sql'       => "char(1) NOT NULL default ''"
-    ],
+    // TODO
+//    'addManualPagination'         => [
+//        'label'     => &$GLOBALS['TL_LANG']['tl_module']['addManualPagination'],
+//        'exclude'   => true,
+//        'inputType' => 'checkbox',
+//        'eval'      => ['tl_class' => 'w50'],
+//        'sql'       => "char(1) NOT NULL default ''"
+//    ],
     'addPagination'               => [
         'label'     => &$GLOBALS['TL_LANG']['tl_module']['addPagination'],
         'exclude'   => true,
@@ -43,9 +44,16 @@ $arrFields = [
         'label'     => &$GLOBALS['TL_LANG']['tl_module']['paginationCeTextCssSelector'],
         'exclude'   => true,
         'inputType' => 'text',
-        'eval'      => ['tl_class' => 'w50', 'decodeEntities' => true],
+        'eval'      => ['tl_class' => 'w50 clr', 'decodeEntities' => true],
         'sql'       => "varchar(128) NOT NULL default ''"
-    ]
+    ],
+    'avoidTrailingHeadlines' => [
+        'label'                   => &$GLOBALS['TL_LANG']['tl_module']['avoidTrailingHeadlines'],
+        'exclude'                 => true,
+        'inputType'               => 'checkbox',
+        'eval'                    => ['tl_class' => 'w50'],
+        'sql'                     => "char(1) NOT NULL default '1'"
+    ],
 ];
 
 $arrDca['fields'] += $arrFields;

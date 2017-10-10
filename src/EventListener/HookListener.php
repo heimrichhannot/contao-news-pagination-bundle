@@ -35,6 +35,8 @@ class HookListener extends \Controller
 
     public function addNewsPagination($objTemplate, $arrArticle, $objModule)
     {
+        $objTemplate->module = $objModule;
+
         if ($objModule->addManualPagination) {
             $this->doAddManualNewsPagination($objTemplate, $arrArticle, $objModule);
         }
@@ -87,42 +89,125 @@ class HookListener extends \Controller
         // add wrapper div since remove() called on root elements doesn't work (bug?)
         $objNode              = new HtmlPageCrawler('<div><div class="news-pagination-content">' . $objTemplate->text . '</div></div>');
         $intTextAmount        = 0;
-        $strCeTextCssSelector = $objModule->paginationCeTextCssSelector ? $objModule->paginationCeTextCssSelector . ' > *' : '*';
+        $strCeTextCssSelector = $objModule->paginationCeTextCssSelector;
         $arrTags              = static::$arrTags;
 
-        $intPage = Request::getGet('page_n' . $objModule->id);
+        $intCurrentPage = Request::getGet('page_n' . $objModule->id);
 
         // replace multiple br elements to
         $objNode->filter('.news-pagination-content > [class*="ce_"]')->each(
-            function ($objElement) use (&$intTextAmount, $intMaxAmount, $intPage, $arrTags, $objNode, $strCeTextCssSelector) {
+            function ($objElement) use (&$intTextAmount, $intMaxAmount, $arrTags, $objNode, $strCeTextCssSelector) {
                 if (strpos($objElement->getAttribute('class'), 'ce_text') !== false && strpos($objElement->html(), 'figure') === false) {
                     $objElement->children($strCeTextCssSelector . ', figure')->each(
-                        function ($objParagraph) use (&$intTextAmount, $intMaxAmount, $intPage, $arrTags) {
+                        function ($objParagraph) use (&$intTextAmount, $intMaxAmount, $arrTags) {
                             $objParagraph->html(preg_replace('@<br\s?\/?><br\s?\/?>@i', '</p><p>', $objParagraph->html()));
                         });
                 }
             }
         );
 
-        $objNode = new HtmlPageCrawler($objNode->saveHTML());
+        // pagination
+        $objNode     = new HtmlPageCrawler($objNode->saveHTML());
+        $arrElements = [];
 
+        // get relevant elements
         $objNode->filter('.news-pagination-content > [class*="ce_"]')->each(
-            function ($objElement) use (&$intTextAmount, $intMaxAmount, $intPage, $arrTags, $objNode, $strCeTextCssSelector, &$intPageCount) {
-                if (strpos($objElement->getAttribute('class'), 'ce_text') !== false && strpos($objElement->html(), 'figure') === false) {
-                    $objElement->children($strCeTextCssSelector . ', figure')->each(
-                        function ($objParagraph) use (&$intTextAmount, $intMaxAmount, $intPage, $arrTags, &$intPageCount) {
-                            if (in_array($objParagraph->getNode(0)->tagName, $arrTags)) {
-                                $intTextAmount += strlen($objParagraph->text());
-                            }
+            function ($objElement) use (&$intTextAmount, $intMaxAmount, $arrTags, $objNode, $strCeTextCssSelector, &$intPageCount, &$arrElements) {
+                if (strpos($objElement->getAttribute('class'), 'ce_text') !== false &&
+                    strpos($objElement->html(), 'figure') === false
+                ) {
+                    if ($strCeTextCssSelector)
+                    {
+                        $objElement = $objElement->filter($strCeTextCssSelector);
+                    }
 
-                            static::removeNodeIfNecessary($intPage, $intTextAmount, $intMaxAmount, $objParagraph, $intPageCount);
+                    $objElement->children()->each(
+                        function ($objElement) use (&$intTextAmount, $intMaxAmount, $arrTags, &$intPageCount, &$arrElements) {
+                            $arrElements[] = [
+                                'element' => $objElement,
+                                'text'    => $objElement->text(),
+                                'tag'     => $objElement->nodeName(),
+                                'length'  => strlen($objElement->text())
+                            ];
                         }
                     );
                 } else {
-                    static::removeNodeIfNecessary($intPage, $intTextAmount, $intMaxAmount, $objElement, $intPageCount);
+                    $arrElements[] = [
+                        'element' => $objElement,
+                        'text'    => $objElement->text(),
+                        'tag'     => $objElement->nodeName(),
+                        'length'  => 0
+                    ];
                 }
             }
         );
+
+        // split array by text amounts
+        $arrSplitted = [];
+
+        foreach ($arrElements as $arrElement) {
+            $intTextAmountOrigin = $intTextAmount;
+            $intTextAmount       += $arrElement['length'];
+
+            if ($intTextAmount > $intMaxAmount && $intTextAmountOrigin != 0) {
+                $intPageCount++;
+                $intTextAmount = $arrElement['length'];
+            }
+
+            if (!isset($arrSplitted[$intPageCount])) {
+                $arrSplitted[$intPageCount] = [];
+            }
+
+            $arrSplitted[$intPageCount][] = $arrElement;
+        }
+
+        // hold together headlines and paragraphs
+        $arrResult = [];
+
+        foreach ($arrSplitted as $intPage => $arrParts) {
+            $arrHeadlines    = [];
+            $arrNonHeadlines = [];
+            $blnTrailingHeadlines = true;
+
+            for ($i = count($arrParts) - 1; $i > -1; $i--) {
+                if ($blnTrailingHeadlines && in_array($arrParts[$i]['tag'], ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8', 'h9', 'h10'])) {
+                    $arrHeadlines[] = $arrParts[$i];
+                } else {
+                    // break overlap handling if headline is not trailing
+                    $blnTrailingHeadlines = false;
+                    $arrNonHeadlines[] = $arrParts[$i];
+                }
+            }
+
+            if (empty($arrResult[$intPage])) {
+                $arrResult[$intPage] = array_reverse($arrNonHeadlines);
+            } else {
+                $arrResult[$intPage] = array_merge($arrResult[$intPage], array_reverse($arrNonHeadlines));
+            }
+
+            if (!empty($arrHeadlines))
+            {
+                if (empty($arrResult[$intPage + 1])) {
+                    $arrResult[$intPage + 1] = array_reverse($arrHeadlines);
+                } else {
+                    $arrResult[$intPage + 1] = array_merge(array_reverse($arrHeadlines), $arrResult[$intPage + 1]);
+                }
+            }
+        }
+
+        foreach ($arrResult as $intPage => $arrParts) {
+            foreach ($arrParts as $arrPart) {
+                if ($intCurrentPage && is_numeric($intCurrentPage)) {
+                    if ($intPage != $intCurrentPage) {
+                        $arrPart['element']->remove();
+                    }
+                } else {
+                    if ($intPage != 1) {
+                        $arrPart['element']->remove();
+                    }
+                }
+            }
+        }
 
         $objTemplate->text = str_replace(['%7B', '%7D'], ['{', '}'], $objNode->saveHTML());
 
@@ -134,8 +219,7 @@ class HookListener extends \Controller
 
     private static function removeNodeIfNecessary($intPage, &$intTextAmount, $intMaxAmount, $objElement, &$intPageCount)
     {
-        if ($intTextAmount > $intMaxAmount)
-        {
+        if ($intTextAmount > $intMaxAmount) {
             $intPageCount++;
             $intTextAmount = strlen($objElement->text());
         }

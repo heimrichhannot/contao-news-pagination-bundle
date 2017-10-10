@@ -13,6 +13,8 @@ $arrLang['paginationMaxCharCount'][0]      = 'Maximale Zeichenanzahl';
 $arrLang['paginationMaxCharCount'][1]      = 'Geben Sie hier an, wie viele Zeichen ein Abschnitt der Paginierung enthalten soll.';
 $arrLang['paginationCeTextCssSelector'][0] = 'CSS-Selektor in ce_text';
 $arrLang['paginationCeTextCssSelector'][1] = 'Wenn Sie das Template "ce_text" überschrieben haben, können Sie hier den CSS-Selektor anpassen, der zu den Elementen führt, die den Text enthalten, also bspw. den p-Elementen (Standard: ".ce_text").';
+$arrLang['avoidTrailingHeadlines'][0]      = 'Überschriften am Ende einer Seite vermeiden';
+$arrLang['avoidTrailingHeadlines'][1]      = 'Wählen Sie diese Option, um Überschriften und Absätze zusammenzuhalten.';
 
 /**
  * Legends
