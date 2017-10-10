@@ -96,12 +96,30 @@ class HookListener extends \Controller
         $objNode->filter('.news-pagination-content > [class*="ce_"]')->each(
             function ($objElement) use (&$intTextAmount, $intMaxAmount, $intPage, $arrTags, $objNode, $strCeTextCssSelector) {
                 if (strpos($objElement->getAttribute('class'), 'ce_text') !== false && strpos($objElement->html(), 'figure') === false) {
-                    $objElement->filter($strCeTextCssSelector . ', figure')->each(
+                    $objElement->children($strCeTextCssSelector . ', figure')->each(
                         function ($objParagraph) use (&$intTextAmount, $intMaxAmount, $intPage, $arrTags) {
-                            $strHtml = preg_replace('@<br\s?\/?><br\s?\/?>@i', '</p><p>', $objParagraph->html());
-
-                            $objParagraph->html($objParagraph->html());
+                            $objParagraph->html(preg_replace('@<br\s?\/?><br\s?\/?>@i', '</p><p>', $objParagraph->html()));
                         });
+                }
+            }
+        );
+
+        $objNode = new HtmlPageCrawler($objNode->saveHTML());
+
+        $objNode->filter('.news-pagination-content > [class*="ce_"]')->each(
+            function ($objElement) use (&$intTextAmount, $intMaxAmount, $intPage, $arrTags, $objNode, $strCeTextCssSelector, &$intPageCount) {
+                if (strpos($objElement->getAttribute('class'), 'ce_text') !== false && strpos($objElement->html(), 'figure') === false) {
+                    $objElement->children($strCeTextCssSelector . ', figure')->each(
+                        function ($objParagraph) use (&$intTextAmount, $intMaxAmount, $intPage, $arrTags, &$intPageCount) {
+                            if (in_array($objParagraph->getNode(0)->tagName, $arrTags)) {
+                                $intTextAmount += strlen($objParagraph->text());
+                            }
+
+                            static::removeNodeIfNecessary($intPage, $intTextAmount, $intMaxAmount, $objParagraph, $intPageCount);
+                        }
+                    );
+                } else {
+                    static::removeNodeIfNecessary($intPage, $intTextAmount, $intMaxAmount, $objElement, $intPageCount);
                 }
             }
         );
