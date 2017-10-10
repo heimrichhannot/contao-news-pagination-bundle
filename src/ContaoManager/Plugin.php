@@ -1,19 +1,13 @@
 <?php
 
-namespace Dav\NewsBundle\ContaoManager;
+namespace HeimrichHannot\NewsPaginationBundle\ContaoManager;
 
-use Codefog\TagsBundle\CodefogTagsBundle;
-use Contao\ManagerPlugin\Bundle\BundlePluginInterface;
 use Contao\ManagerPlugin\Bundle\Config\BundleConfig;
+use Contao\ManagerPlugin\Bundle\BundlePluginInterface;
 use Contao\ManagerPlugin\Bundle\Parser\ParserInterface;
-use Contao\ManagerPlugin\Routing\RoutingPluginInterface;
-use Symfony\Component\Config\Loader\LoaderResolverInterface;
-use Dav\NewsBundle\DavContaoNewsBundle;
-use Symfony\Component\HttpKernel\KernelInterface;
-use HeimrichHannot\NewsBundle\HeimrichHannotContaoNewsBundle;
-use Symfony\Component\Routing\RouteCollection;
+use Contao\NewsBundle\ContaoNewsBundle;
 
-class Plugin implements BundlePluginInterface, RoutingPluginInterface
+class Plugin implements BundlePluginInterface
 {
     /**
      * {@inheritdoc}
@@ -21,23 +15,9 @@ class Plugin implements BundlePluginInterface, RoutingPluginInterface
     public function getBundles(ParserInterface $parser)
     {
         return [
-            BundleConfig::create(DavContaoNewsBundle::class)
-                ->setLoadAfter([HeimrichHannotContaoNewsBundle::class, 'slick']),
+            BundleConfig::create('HeimrichHannot\NewsPaginationBundle\HeimrichHannotNewsPaginationBundle')
+                ->setLoadAfter(ContaoNewsBundle::class)
         ];
     }
-
-    /**
-     * Returns a collection of routes for this bundle.
-     *
-     * @param LoaderResolverInterface $resolver
-     * @param KernelInterface         $kernel
-     *
-     * @return null|RouteCollection
-     */
-    public function getRouteCollection(LoaderResolverInterface $resolver, KernelInterface $kernel)
-    {
-        return $resolver
-            ->resolve(__DIR__ . '/../Resources/config/routing.yml')
-            ->load(__DIR__ . '/../Resources/config/routing.yml');
-    }
 }
+
