@@ -3,11 +3,27 @@
 namespace HeimrichHannot\NewsPaginationBundle\EventListener;
 
 
+use Contao\CoreBundle\Framework\ContaoFrameworkInterface;
 use HeimrichHannot\Request\Request;
 use Wa72\HtmlPageDom\HtmlPageCrawler;
 
 class HookListener extends \Controller
 {
+    /**
+     * @var ContaoFrameworkInterface
+     */
+    private $framework;
+
+    /**
+     * Constructor.
+     *
+     * @param ContaoFrameworkInterface $framework
+     */
+    public function __construct(ContaoFrameworkInterface $framework)
+    {
+        $this->framework = $framework;
+    }
+
     static $arrTags = [
         'p',
         'span',
