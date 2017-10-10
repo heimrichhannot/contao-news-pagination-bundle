@@ -1,0 +1,5 @@
+services:
+    huh.news_pagination.listener.hooks:
+        class: HeimrichHannot\NewsPaginationBundle\EventListener\HookListener
+        arguments:
+            - "@contao.framework"

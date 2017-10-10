@@ -1,6 +1,6 @@
 <?php
 
-namespace HeimrichHannot\NewsPagination;
+namespace HeimrichHannot\NewsPaginationBundle\EventListener;
 
 
 use HeimrichHannot\Request\Request;

@@ -11,6 +11,8 @@ namespace HeimrichHannot\NewsPaginationBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class HeimrichHannotContaoNewsPaginationBundle extends Bundle
+class ContaoNewsPaginationBundle extends Bundle
 {
+    const CONTENT_ELEMENT_NEWS_PAGINATION_START = 'news_pagination_start';
+    const CONTENT_ELEMENT_NEWS_PAGINATION_STOP  = 'news_pagination_stop';
 }
