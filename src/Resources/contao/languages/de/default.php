@@ -5,12 +5,12 @@
  */
 $GLOBALS['TL_LANG']['CTE']['news_pagination'] = 'Nachrichten-Paginierung';
 
-$GLOBALS['TL_LANG']['CTE'][\HeimrichHannot\NewsPaginationBundle\ContaoNewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_START][0] =
+$GLOBALS['TL_LANG']['CTE'][\HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_START][0] =
     'Paginierungsabschnitt Anfang';
-$GLOBALS['TL_LANG']['CTE'][\HeimrichHannot\NewsPaginationBundle\ContaoNewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_START][1] =
+$GLOBALS['TL_LANG']['CTE'][\HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_START][1] =
     'Definiert den Start eines Paginierungsabschnitts';
 
-$GLOBALS['TL_LANG']['CTE'][\HeimrichHannot\NewsPaginationBundle\ContaoNewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_STOP][0] =
+$GLOBALS['TL_LANG']['CTE'][\HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_STOP][0] =
     'Paginierungsabschnitt Ende';
-$GLOBALS['TL_LANG']['CTE'][\HeimrichHannot\NewsPaginationBundle\ContaoNewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_STOP][1] =
+$GLOBALS['TL_LANG']['CTE'][\HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_STOP][1] =
     'Definiert den Start eines Paginierungsabschnitts';

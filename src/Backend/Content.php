@@ -3,14 +3,14 @@
 namespace HeimrichHannot\NewsPagination\Backend;
 
 
-use HeimrichHannot\NewsPaginationBundle\ContaoNewsPaginationBundle;
+use HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle;
 
 class Content extends \Backend
 {
     public static function addNewsPaginationStopElement(\DataContainer $objDc)
     {
         if (($objElement = \ContentModel::findByPk($objDc->id)) === null
-            || $objElement->type !== ContaoNewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_START
+            || $objElement->type !== NewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_START
             || $objElement->newsPaginationStopCreated
         )
         {
@@ -36,7 +36,7 @@ class Content extends \Backend
         $objStop->ptable  = $objElement->ptable;
         $objStop->pid     = $objElement->pid;
         $objStop->sorting = $objElement->sorting;
-        $objStop->type    = ContaoNewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_STOP;
+        $objStop->type    = NewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_STOP;
 
         $objStop->save();
 

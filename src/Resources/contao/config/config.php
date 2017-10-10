@@ -10,9 +10,9 @@ $GLOBALS['TL_HOOKS']['parseArticles']['addNewsPagination'] = ['huh.news_paginati
  */
 if (\Input::get('do') == 'news' && \Input::get('table') == 'tl_content' || TL_MODE == 'FE') {
     $GLOBALS['TL_CTE']['news_pagination'] = [
-        \HeimrichHannot\NewsPaginationBundle\ContaoNewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_START =>
+        \HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_START =>
             'HeimrichHannot\NewsPagination\NewsPaginationStart',
-        \HeimrichHannot\NewsPaginationBundle\ContaoNewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_STOP  =>
+        \HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_STOP  =>
             'HeimrichHannot\NewsPagination\NewsPaginationStop'
     ];
 }
@@ -20,5 +20,5 @@ if (\Input::get('do') == 'news' && \Input::get('table') == 'tl_content' || TL_MO
 /**
  * Wrapper
  */
-$GLOBALS['TL_WRAPPERS']['start'][] = \HeimrichHannot\NewsPaginationBundle\ContaoNewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_START;
-$GLOBALS['TL_WRAPPERS']['stop'][]  = \HeimrichHannot\NewsPaginationBundle\ContaoNewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_STOP;
+$GLOBALS['TL_WRAPPERS']['start'][] = \HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_START;
+$GLOBALS['TL_WRAPPERS']['stop'][]  = \HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_STOP;
