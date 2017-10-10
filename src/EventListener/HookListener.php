@@ -116,8 +116,7 @@ class HookListener extends \Controller
                 if (strpos($objElement->getAttribute('class'), 'ce_text') !== false &&
                     strpos($objElement->html(), 'figure') === false
                 ) {
-                    if ($strCeTextCssSelector)
-                    {
+                    if ($strCeTextCssSelector) {
                         $objElement = $objElement->filter($strCeTextCssSelector);
                     }
 
@@ -162,37 +161,40 @@ class HookListener extends \Controller
         }
 
         // hold together headlines and paragraphs
-        $arrResult = [];
+        if ($objModule->avoidTrailingHeadlines) {
+            $arrResult = [];
 
-        foreach ($arrSplitted as $intPage => $arrParts) {
-            $arrHeadlines    = [];
-            $arrNonHeadlines = [];
-            $blnTrailingHeadlines = true;
+            foreach ($arrSplitted as $intPage => $arrParts) {
+                $arrHeadlines         = [];
+                $arrNonHeadlines      = [];
+                $blnTrailingHeadlines = true;
 
-            for ($i = count($arrParts) - 1; $i > -1; $i--) {
-                if ($blnTrailingHeadlines && in_array($arrParts[$i]['tag'], ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8', 'h9', 'h10'])) {
-                    $arrHeadlines[] = $arrParts[$i];
+                for ($i = count($arrParts) - 1; $i > -1; $i--) {
+                    if ($blnTrailingHeadlines && in_array($arrParts[$i]['tag'], ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8', 'h9', 'h10'])) {
+                        $arrHeadlines[] = $arrParts[$i];
+                    } else {
+                        // break overlap handling if headline is not trailing
+                        $blnTrailingHeadlines = false;
+                        $arrNonHeadlines[]    = $arrParts[$i];
+                    }
+                }
+
+                if (empty($arrResult[$intPage])) {
+                    $arrResult[$intPage] = array_reverse($arrNonHeadlines);
                 } else {
-                    // break overlap handling if headline is not trailing
-                    $blnTrailingHeadlines = false;
-                    $arrNonHeadlines[] = $arrParts[$i];
+                    $arrResult[$intPage] = array_merge($arrResult[$intPage], array_reverse($arrNonHeadlines));
+                }
+
+                if (!empty($arrHeadlines)) {
+                    if (empty($arrResult[$intPage + 1])) {
+                        $arrResult[$intPage + 1] = array_reverse($arrHeadlines);
+                    } else {
+                        $arrResult[$intPage + 1] = array_merge(array_reverse($arrHeadlines), $arrResult[$intPage + 1]);
+                    }
                 }
             }
-
-            if (empty($arrResult[$intPage])) {
-                $arrResult[$intPage] = array_reverse($arrNonHeadlines);
-            } else {
-                $arrResult[$intPage] = array_merge($arrResult[$intPage], array_reverse($arrNonHeadlines));
-            }
-
-            if (!empty($arrHeadlines))
-            {
-                if (empty($arrResult[$intPage + 1])) {
-                    $arrResult[$intPage + 1] = array_reverse($arrHeadlines);
-                } else {
-                    $arrResult[$intPage + 1] = array_merge(array_reverse($arrHeadlines), $arrResult[$intPage + 1]);
-                }
-            }
+        } else {
+            $arrResult = $arrSplitted;
         }
 
         foreach ($arrResult as $intPage => $arrParts) {
