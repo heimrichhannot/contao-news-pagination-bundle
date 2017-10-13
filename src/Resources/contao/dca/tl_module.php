@@ -12,7 +12,7 @@ $arrDca['palettes']['newsreader'] =
  * Subpalettes
  */
 $arrDca['palettes']['__selector__'][]   = 'addPagination';
-$arrDca['subpalettes']['addPagination'] = 'paginationMaxCharCount,avoidTrailingHeadlines,paginationCeTextCssSelector';
+$arrDca['subpalettes']['addPagination'] = 'paginationMaxCharCount,avoidTrailingHeadlines,paginationCeTextCssSelector,fullVersionGetParameter,addFullVersionCanonicalLink,addPrevNextLinks';
 
 /**
  * Fields
@@ -44,15 +44,37 @@ $arrFields = [
         'label'     => &$GLOBALS['TL_LANG']['tl_module']['paginationCeTextCssSelector'],
         'exclude'   => true,
         'inputType' => 'text',
-        'eval'      => ['tl_class' => 'w50 clr', 'decodeEntities' => true],
+        'eval'      => ['tl_class' => 'w50', 'decodeEntities' => true],
         'sql'       => "varchar(128) NOT NULL default ''"
     ],
-    'avoidTrailingHeadlines' => [
-        'label'                   => &$GLOBALS['TL_LANG']['tl_module']['avoidTrailingHeadlines'],
-        'exclude'                 => true,
-        'inputType'               => 'checkbox',
-        'eval'                    => ['tl_class' => 'w50'],
-        'sql'                     => "char(1) NOT NULL default '1'"
+    'avoidTrailingHeadlines'      => [
+        'label'     => &$GLOBALS['TL_LANG']['tl_module']['avoidTrailingHeadlines'],
+        'exclude'   => true,
+        'inputType' => 'checkbox',
+        'eval'      => ['tl_class' => 'w50'],
+        'sql'       => "char(1) NOT NULL default '1'"
+    ],
+    'fullVersionGetParameter'     => [
+        'label'     => &$GLOBALS['TL_LANG']['tl_module']['fullVersionGetParameter'],
+        'exclude'   => true,
+        'search'    => true,
+        'inputType' => 'text',
+        'eval'      => ['maxlength' => 255, 'tl_class' => 'w50'],
+        'sql'       => "varchar(255) NOT NULL default 'print'"
+    ],
+    'addFullVersionCanonicalLink' => [
+        'label'     => &$GLOBALS['TL_LANG']['tl_module']['addFullVersionCanonicalLink'],
+        'exclude'   => true,
+        'inputType' => 'checkbox',
+        'eval'      => ['tl_class' => 'w50'],
+        'sql'       => "char(1) NOT NULL default '1'"
+    ],
+    'addPrevNextLinks'            => [
+        'label'     => &$GLOBALS['TL_LANG']['tl_module']['setPrevNextLinks'],
+        'exclude'   => true,
+        'inputType' => 'checkbox',
+        'eval'      => ['tl_class' => 'w50 clr'],
+        'sql'       => "char(1) NOT NULL default '1'"
     ],
 ];
 

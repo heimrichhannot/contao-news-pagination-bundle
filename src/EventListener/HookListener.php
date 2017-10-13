@@ -4,7 +4,9 @@ namespace HeimrichHannot\NewsPaginationBundle\EventListener;
 
 
 use Contao\CoreBundle\Framework\ContaoFrameworkInterface;
-use HeimrichHannot\Request\Request;
+use HeimrichHannot\Haste\Util\Container;
+use HeimrichHannot\Haste\Util\Url;
+use Symfony\Component\HttpFoundation\Request;
 use Wa72\HtmlPageDom\HtmlPageCrawler;
 
 class HookListener extends \Controller
@@ -83,6 +85,15 @@ class HookListener extends \Controller
 
     public function doAddNewsPagination($objTemplate, $arrArticle, $objModule)
     {
+        $strPageParam   = 'page_n' . $objModule->id;
+        $intCurrentPage = is_numeric(Container::getGet($strPageParam)) && Container::getGet($strPageParam) > 0 ?
+            Container::getGet($strPageParam) : 1;
+
+        // no pagination if full version parameter is set
+        if ($objModule->fullVersionGetParameter && Container::getGet($objModule->fullVersionGetParameter)) {
+            return;
+        }
+
         $intMaxAmount = $objModule->paginationMaxCharCount;
         $intPageCount = 1;
 
@@ -91,8 +102,6 @@ class HookListener extends \Controller
         $intTextAmount        = 0;
         $strCeTextCssSelector = $objModule->paginationCeTextCssSelector;
         $arrTags              = static::$arrTags;
-
-        $intCurrentPage = Request::getGet('page_n' . $objModule->id);
 
         // replace multiple br elements to
         $objNode->filter('.news-pagination-content > [class*="ce_"]')->each(
@@ -197,9 +206,15 @@ class HookListener extends \Controller
             $arrResult = $arrSplitted;
         }
 
+        // can't be ;-)
+        if ($intCurrentPage > $intPageCount)
+        {
+            $intCurrentPage = $intPageCount;
+        }
+
         foreach ($arrResult as $intPage => $arrParts) {
             foreach ($arrParts as $arrPart) {
-                if ($intCurrentPage && is_numeric($intCurrentPage)) {
+                if ($intCurrentPage) {
                     if ($intPage != $intCurrentPage) {
                         $arrPart['element']->remove();
                     }
@@ -215,24 +230,50 @@ class HookListener extends \Controller
 
         // add pagination
         $objPagination               =
-            new \Pagination($intPageCount, 1, \Config::get('maxPaginationLinks'), 'page_n' . $objModule->id);
+            new \Pagination($intPageCount, 1, \Config::get('maxPaginationLinks'), $strPageParam);
         $objTemplate->newsPagination = $objPagination->generate("\n  ");
-    }
 
-    private static function removeNodeIfNecessary($intPage, &$intTextAmount, $intMaxAmount, $objElement, &$intPageCount)
-    {
-        if ($intTextAmount > $intMaxAmount) {
-            $intPageCount++;
-            $intTextAmount = strlen($objElement->text());
+        // add head info
+
+        /** @var $objPage \Contao\PageModel */
+        global $objPage;
+
+        // path without query string
+        $path = Request::createFromGlobals()->getPathInfo();
+        $url  = \Contao\Environment::get('url') . $path;
+
+        // if path is id, take absolute url from current page
+        if (is_numeric(ltrim($path, '/'))) {
+            $url = $objPage->getAbsoluteUrl();
         }
 
-        if ($intPage && is_numeric($intPage)) {
-            if ($intPageCount != $intPage) {
-                $objElement->remove();
+        if ($intPageCount > 1)
+        {
+            if ($objModule->addFullVersionCanonicalLink && $objModule->fullVersionGetParameter) {
+                \System::getContainer()->get('huh.head.tag.link_canonical')->setContent(
+                    Url::addQueryString($objModule->fullVersionGetParameter . '=1', $url)
+                );
             }
-        } else {
-            if ($intPageCount != 1) {
-                $objElement->remove();
+
+            // prev and next links
+            if ($objModule->addPrevNextLinks) {
+                if ($intCurrentPage == 1) {
+                    \System::getContainer()->get('huh.head.tag.link_next')->setContent(
+                        Url::addQueryString($strPageParam . '=2', $url)
+                    );
+                } elseif ($intCurrentPage > 1 && $intCurrentPage < $intPageCount) {
+                    \System::getContainer()->get('huh.head.tag.link_prev')->setContent(
+                        Url::addQueryString($strPageParam . '=' . ($intCurrentPage - 1), $url)
+                    );
+
+                    \System::getContainer()->get('huh.head.tag.link_next')->setContent(
+                        Url::addQueryString($strPageParam . '=' . ($intCurrentPage + 1), $url)
+                    );
+                } else if ($intCurrentPage >= $intPageCount) {
+                    \System::getContainer()->get('huh.head.tag.link_prev')->setContent(
+                        Url::addQueryString($strPageParam . '=' . ($intPageCount - 1), $url)
+                    );
+                }
             }
         }
     }
