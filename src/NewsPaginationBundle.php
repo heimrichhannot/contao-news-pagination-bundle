@@ -9,7 +9,7 @@
 
 namespace HeimrichHannot\NewsPaginationBundle;
 
-use HeimrichHannot\NewsBundle\DependencyInjection\NewsPaginationExtension;
+use HeimrichHannot\NewsPaginationBundle\DependencyInjection\NewsPaginationExtension;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class NewsPaginationBundle extends Bundle
