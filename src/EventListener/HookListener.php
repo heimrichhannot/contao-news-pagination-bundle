@@ -207,8 +207,7 @@ class HookListener extends \Controller
         }
 
         // can't be ;-)
-        if ($intCurrentPage > $intPageCount)
-        {
+        if ($intCurrentPage > $intPageCount) {
             $intCurrentPage = $intPageCount;
         }
 
@@ -247,9 +246,11 @@ class HookListener extends \Controller
             $url = $objPage->getAbsoluteUrl();
         }
 
-        if ($intPageCount > 1)
-        {
-            if ($objModule->addFullVersionCanonicalLink && $objModule->fullVersionGetParameter) {
+        if ($intPageCount > 1) {
+            $canonical = \System::getContainer()->get('huh.head.tag.link_canonical')->getContent();
+
+            // canonical link must contain the current news url or not set
+            if ($objModule->addFullVersionCanonicalLink && $objModule->fullVersionGetParameter && (!$canonical || strpos($canonical, $arrArticle['alias']) !== false)) {
                 \System::getContainer()->get('huh.head.tag.link_canonical')->setContent(
                     Url::addQueryString($objModule->fullVersionGetParameter . '=1', $url)
                 );
