@@ -8,6 +8,7 @@ use HeimrichHannot\Haste\Util\Container;
 use HeimrichHannot\Haste\Util\Url;
 use Symfony\Component\HttpFoundation\Request;
 use Wa72\HtmlPageDom\HtmlPageCrawler;
+use Contao\StringUtil;
 
 class HookListener extends \Controller
 {
@@ -54,7 +55,7 @@ class HookListener extends \Controller
         $intMaxIndex = 0;
 
         // add wrapper div since remove() called on root elements doesn't work (bug?)
-        $objNode          = new HtmlPageCrawler('<div><div class="news-pagination-content">' . $objTemplate->text . '</div></div>');
+        $objNode          = new HtmlPageCrawler('<div><div class="news-pagination-content">' . StringUtil::restoreBasicEntities($objTemplate->text) . '</div></div>');
         $objStartElements = $objNode->filter('.news-pagination-content > [class*="ce_news_pagination_start"]');
 
         if ($objStartElements->count() < 1) {
@@ -98,7 +99,7 @@ class HookListener extends \Controller
         $intPageCount = 1;
 
         // add wrapper div since remove() called on root elements doesn't work (bug?)
-        $objNode              = new HtmlPageCrawler('<div><div class="news-pagination-content">' . $objTemplate->text . '</div></div>');
+        $objNode              = new HtmlPageCrawler('<div><div class="news-pagination-content">' . StringUtil::restoreBasicEntities($objTemplate->text) . '</div></div>');
         $intTextAmount        = 0;
         $strCeTextCssSelector = $objModule->paginationCeTextCssSelector;
         $arrTags              = static::$arrTags;
