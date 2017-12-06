@@ -1,6 +1,6 @@
 <?php
 
-namespace HeimrichHannot\NewsPaginationBundle;
+namespace HeimrichHannot\NewsPaginationBundle\Element;
 
 
 class NewsPaginationStop extends \ContentElement

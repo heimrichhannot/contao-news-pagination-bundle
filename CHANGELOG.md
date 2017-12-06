@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.0.4] - 2017-12-06
+
+### Added
+- manual pagination
+
 ## [1.0.3] - 2017-12-04
 
 ### Fixed

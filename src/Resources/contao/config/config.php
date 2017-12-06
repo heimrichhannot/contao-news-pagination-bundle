@@ -9,12 +9,10 @@ $GLOBALS['TL_HOOKS']['parseArticles']['addNewsPagination'] = ['huh.news_paginati
  * Content elements
  */
 if (\Input::get('do') == 'news' && \Input::get('table') == 'tl_content' || TL_MODE == 'FE') {
-    $GLOBALS['TL_CTE']['news_pagination'] = [
-        \HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_START =>
-            'HeimrichHannot\NewsPagination\NewsPaginationStart',
+    \HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_START =>
+            'HeimrichHannot\NewsPaginationBundle\Element\NewsPaginationStart',
         \HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_STOP  =>
-            'HeimrichHannot\NewsPagination\NewsPaginationStop'
-    ];
+            'HeimrichHannot\NewsPaginationBundle\Element\NewsPaginationStop'
 }
 
 /**

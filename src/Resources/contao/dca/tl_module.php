@@ -18,14 +18,13 @@ $arrDca['subpalettes']['addPagination'] = 'paginationMaxCharCount,avoidTrailingH
  * Fields
  */
 $arrFields = [
-    // TODO
-//    'addManualPagination'         => [
-//        'label'     => &$GLOBALS['TL_LANG']['tl_module']['addManualPagination'],
-//        'exclude'   => true,
-//        'inputType' => 'checkbox',
-//        'eval'      => ['tl_class' => 'w50'],
-//        'sql'       => "char(1) NOT NULL default ''"
-//    ],
+    'addManualPagination'         => [
+        'label'     => &$GLOBALS['TL_LANG']['tl_module']['addManualPagination'],
+        'exclude'   => true,
+        'inputType' => 'checkbox',
+        'eval'      => ['tl_class' => 'w50'],
+        'sql'       => "char(1) NOT NULL default ''"
+    ],
     'addPagination'               => [
         'label'     => &$GLOBALS['TL_LANG']['tl_module']['addPagination'],
         'exclude'   => true,
