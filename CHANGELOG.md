@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.0.5] - 2017-12-06
+
+### Fixed
+- syntax error
+
 ## [1.0.4] - 2017-12-06
 
 ### Added
