@@ -3,7 +3,9 @@
 namespace HeimrichHannot\NewsPaginationBundle\Element;
 
 
-class NewsPaginationStop extends \ContentElement
+use Contao\ContentElement;
+
+class NewsPaginationStop extends ContentElement
 {
 
     protected $strTemplate = 'ce_news_pagination_stop';

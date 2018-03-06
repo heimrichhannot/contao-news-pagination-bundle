@@ -3,10 +3,18 @@
 namespace HeimrichHannot\NewsPaginationBundle\EventListener;
 
 
+use Contao\Config;
 use Contao\CoreBundle\Framework\ContaoFrameworkInterface;
-use HeimrichHannot\Haste\Util\Container;
-use HeimrichHannot\Haste\Util\Url;
-use Symfony\Component\HttpFoundation\Request;
+use Contao\Environment;
+use Contao\Module;
+use Contao\Pagination;
+use Contao\Template;
+use HeimrichHannot\HeadBundle\Tag\Link\LinkCanonical;
+use HeimrichHannot\HeadBundle\Tag\Link\LinkNext;
+use HeimrichHannot\HeadBundle\Tag\Link\LinkPrev;
+use HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle;
+use HeimrichHannot\Request\Request;
+use HeimrichHannot\UtilsBundle\Url\UrlUtil;
 use Wa72\HtmlPageDom\HtmlPageCrawler;
 use Contao\StringUtil;
 
@@ -18,18 +26,42 @@ class HookListener extends \Controller
     private $framework;
 
     /**
-     * Constructor.
-     *
-     * @param ContaoFrameworkInterface $framework
+     * @var LinkCanonical
      */
-    public function __construct(ContaoFrameworkInterface $framework)
-    {
-        $this->framework = $framework;
+    private $linkCanonical;
+
+    /**
+     * @var LinkPrev
+     */
+    private $linkPrev;
+
+    /**
+     * @var LinkNext
+     */
+    private $linkNext;
+
+    /**
+     * @var UrlUtil
+     */
+    private $urlUtil;
+
+    public function __construct(
+        ContaoFrameworkInterface $framework,
+        LinkCanonical $linkCanonical,
+        LinkPrev $linkPrev,
+        LinkNext $linkNext,
+        UrlUtil $urlUtil
+    ) {
+        $this->framework     = $framework;
+        $this->linkCanonical = $linkCanonical;
+        $this->linkPrev      = $linkPrev;
+        $this->linkNext      = $linkNext;
+        $this->urlUtil       = $urlUtil;
     }
 
     static $manualPaginationFound = false;
 
-    static $arrTags = [
+    static $tags = [
         'p',
         'span',
         'strong',
@@ -38,105 +70,121 @@ class HookListener extends \Controller
         'div'
     ];
 
-    public function addNewsPagination($objTemplate, $arrArticle, $objModule)
+    public function addNewsPagination(Template $template, array $article, Module $module)
     {
-        $objTemplate->module = $objModule;
+        $template->module = $module;
 
-        if ($objModule->addManualPagination) {
-            $this->doAddManualNewsPagination($objTemplate, $arrArticle, $objModule);
+        // no pagination if full version parameter is set
+        if ($module->fullVersionGetParameter && Request::getGet($module->fullVersionGetParameter) ||
+            $module->acceptPrintGetParameter && Request::getGet('print')
+        ) {
+            return;
         }
 
-        if (!static::$manualPaginationFound && $objModule->addPagination) {
-            $this->doAddNewsPagination($objTemplate, $arrArticle, $objModule);
+        switch ($module->paginationMode)
+        {
+            case NewsPaginationBundle::MODE_AUTO:
+                $this->doAddNewsPagination($template, $article, $module);
+                break;
+            case NewsPaginationBundle::MODE_MANUAL:
+                $this->doAddManualNewsPagination($template, $article, $module);
+                break;
+            case NewsPaginationBundle::MODE_MANUAL_WITH_AUTO_FALLBACK:
+                $this->doAddManualNewsPagination($template, $article, $module);
+
+                if (!static::$manualPaginationFound) {
+                    $this->doAddNewsPagination($template, $article, $module);
+                }
+                break;
         }
     }
 
-    public function doAddManualNewsPagination($objTemplate, $arrArticle, $objModule)
+    public function doAddManualNewsPagination(Template $template, array $article, Module $module)
     {
-        $intPage     = \Input::get('page_n' . $objModule->id) ?: 1;
-        $intMaxIndex = 0;
+        $pageParam = 'page_n' . $module->id;
+        $page      = Request::getGet($pageParam) ?: 1;
+        $maxIndex  = 0;
 
         // add wrapper div since remove() called on root elements doesn't work (bug?)
-        $objNode          = new HtmlPageCrawler('<div><div class="news-pagination-content">' . StringUtil::restoreBasicEntities($objTemplate->text) . '</div></div>');
-        $objStartElements = $objNode->filter('.news-pagination-content > [class*="ce_news_pagination_start"]');
+        $node          = new HtmlPageCrawler('<div><div class="news-pagination-content">' . StringUtil::restoreBasicEntities($template->text) . '</div></div>');
+        $startElements = $node->filter('.news-pagination-content > [class*="ce_news_pagination_start"]');
 
-        if ($objStartElements->count() < 1) {
+        if ($startElements->count() < 1) {
             return;
         }
 
         static::$manualPaginationFound = true;
 
-        $objStartElements->each(
-            function ($objElement) use ($intPage, &$intMaxIndex) {
-                $intIndex = $objElement->getAttribute('data-index');
+        $startElements->each(
+            function ($element) use ($page, &$maxIndex) {
+                $intIndex = $element->getAttribute('data-index');
 
-                if ($intIndex > $intMaxIndex) {
-                    $intMaxIndex = $intIndex;
+                if ($intIndex > $maxIndex) {
+                    $maxIndex = $intIndex;
                 }
 
-                if ($intPage != $intIndex) {
-                    $objElement->remove();
+                if ($page != $intIndex) {
+                    $element->remove();
                 }
             }
         );
 
-        $objTemplate->text = str_replace(['%7B', '%7D'], ['{', '}'], $objNode->saveHTML());
+        $template->text = str_replace(['%7B', '%7D'], ['{', '}'], $node->saveHTML());
 
         // add pagination
-        $objPagination               =
-            new \Pagination($intMaxIndex, 1, \Config::get('maxPaginationLinks'), 'page_n' . $objModule->id);
-        $objTemplate->newsPagination = $objPagination->generate("\n  ");
+        $pagination               = new Pagination($maxIndex, 1, Config::get('maxPaginationLinks'), $pageParam);
+        $template->newsPagination = $pagination->generate("\n  ");
+
+        // path without query string
+        $path = \Symfony\Component\HttpFoundation\Request::createFromGlobals()->getPathInfo();
+        $url  = Environment::get('url') . $path;
+
+        $this->handleMetaTags($maxIndex, $page, $pageParam, $module, $url, $article['alias']);
     }
 
-    public function doAddNewsPagination($objTemplate, $arrArticle, $objModule)
+    public function doAddNewsPagination(Template $template, array $article, Module $module)
     {
-        $strPageParam   = 'page_n' . $objModule->id;
-        $intCurrentPage = is_numeric(Container::getGet($strPageParam)) && Container::getGet($strPageParam) > 0 ?
-            Container::getGet($strPageParam) : 1;
+        $pageParam   = 'page_n' . $module->id;
+        $currentPage = is_numeric(Request::getGet($pageParam)) && Request::getGet($pageParam) > 0 ? Request::getGet($pageParam) : 1;
 
-        // no pagination if full version parameter is set
-        if ($objModule->fullVersionGetParameter && Container::getGet($objModule->fullVersionGetParameter)) {
-            return;
-        }
-
-        $intMaxAmount = $objModule->paginationMaxCharCount;
-        $intPageCount = 1;
+        $maxAmount = $module->paginationMaxCharCount;
+        $pageCount = 1;
 
         // add wrapper div since remove() called on root elements doesn't work (bug?)
-        $objNode              = new HtmlPageCrawler('<div><div class="news-pagination-content">' . StringUtil::restoreBasicEntities($objTemplate->text) . '</div></div>');
-        $intTextAmount        = 0;
-        $strCeTextCssSelector = $objModule->paginationCeTextCssSelector;
-        $arrTags              = static::$arrTags;
+        $node              = new HtmlPageCrawler('<div><div class="news-pagination-content">' . StringUtil::restoreBasicEntities($template->text) . '</div></div>');
+        $textAmount        = 0;
+        $ceTextCssSelector = $module->paginationCeTextCssSelector;
+        $tags              = static::$tags;
 
         // replace multiple br elements to
-        $objNode->filter('.news-pagination-content > [class*="ce_"]')->each(
-            function ($objElement) use (&$intTextAmount, $intMaxAmount, $arrTags, $objNode, $strCeTextCssSelector) {
-                if (strpos($objElement->getAttribute('class'), 'ce_text') !== false && strpos($objElement->html(), 'figure') === false) {
-                    $objElement->children($strCeTextCssSelector . ', figure')->each(
-                        function ($objParagraph) use (&$intTextAmount, $intMaxAmount, $arrTags) {
-                            $objParagraph->html(preg_replace('@<br\s?\/?><br\s?\/?>@i', '</p><p>', $objParagraph->html()));
+        $node->filter('.news-pagination-content > [class*="ce_"]')->each(
+            function ($element) use (&$textAmount, $maxAmount, $tags, $node, $ceTextCssSelector) {
+                if (strpos($element->getAttribute('class'), 'ce_text') !== false && strpos($element->html(), 'figure') === false) {
+                    $element->children($ceTextCssSelector . ', figure')->each(
+                        function ($paragraph) use (&$textAmount, $maxAmount, $tags) {
+                            $paragraph->html(preg_replace('@<br\s?\/?><br\s?\/?>@i', '</p><p>', $paragraph->html()));
                         });
                 }
             }
         );
 
         // pagination
-        $objNode     = new HtmlPageCrawler($objNode->saveHTML());
-        $arrElements = [];
+        $node     = new HtmlPageCrawler($node->saveHTML());
+        $elements = [];
 
         // get relevant elements
-        $objNode->filter('.news-pagination-content > [class*="ce_"]')->each(
-            function ($objElement) use (&$intTextAmount, $intMaxAmount, $arrTags, $objNode, $strCeTextCssSelector, &$intPageCount, &$arrElements) {
-                if (strpos($objElement->getAttribute('class'), 'ce_text') !== false &&
-                    strpos($objElement->html(), 'figure') === false
+        $node->filter('.news-pagination-content > [class*="ce_"]')->each(
+            function ($element) use (&$textAmount, $maxAmount, $tags, $node, $ceTextCssSelector, &$pageCount, &$elements) {
+                if (strpos($element->getAttribute('class'), 'ce_text') !== false &&
+                    strpos($element->html(), 'figure') === false
                 ) {
-                    if ($strCeTextCssSelector) {
-                        $objElement = $objElement->filter($strCeTextCssSelector);
+                    if ($ceTextCssSelector) {
+                        $element = $element->filter($ceTextCssSelector);
                     }
 
-                    $objElement->children()->each(
-                        function ($objElement) use (&$intTextAmount, $intMaxAmount, $arrTags, &$intPageCount, &$arrElements) {
-                            $arrElements[] = [
+                    $element->children()->each(
+                        function ($objElement) use (&$intTextAmount, $textAmount, $tags, &$pageCount, &$elements) {
+                            $elements[] = [
                                 'element' => $objElement,
                                 'text'    => $objElement->text(),
                                 'tag'     => $objElement->nodeName(),
@@ -145,10 +193,10 @@ class HookListener extends \Controller
                         }
                     );
                 } else {
-                    $arrElements[] = [
-                        'element' => $objElement,
-                        'text'    => $objElement->text(),
-                        'tag'     => $objElement->nodeName(),
+                    $elements[] = [
+                        'element' => $element,
+                        'text'    => $element->text(),
+                        'tag'     => $element->nodeName(),
                         'length'  => 0
                     ];
                 }
@@ -156,86 +204,85 @@ class HookListener extends \Controller
         );
 
         // split array by text amounts
-        $arrSplitted = [];
+        $splitted = [];
 
-        foreach ($arrElements as $arrElement) {
-            $intTextAmountOrigin = $intTextAmount;
-            $intTextAmount       += $arrElement['length'];
+        foreach ($elements as $element) {
+            $textAmountOrigin = $textAmount;
+            $textAmount       += $element['length'];
 
-            if ($intTextAmount > $intMaxAmount && $intTextAmountOrigin != 0) {
-                $intPageCount++;
-                $intTextAmount = $arrElement['length'];
+            if ($textAmount > $maxAmount && $textAmountOrigin != 0) {
+                $pageCount++;
+                $textAmount = $element['length'];
             }
 
-            if (!isset($arrSplitted[$intPageCount])) {
-                $arrSplitted[$intPageCount] = [];
+            if (!isset($splitted[$pageCount])) {
+                $splitted[$pageCount] = [];
             }
 
-            $arrSplitted[$intPageCount][] = $arrElement;
+            $splitted[$pageCount][] = $element;
         }
 
         // hold together headlines and paragraphs
-        if ($objModule->avoidTrailingHeadlines) {
-            $arrResult = [];
+        if ($module->avoidTrailingHeadlines) {
+            $result = [];
 
-            foreach ($arrSplitted as $intPage => $arrParts) {
-                $arrHeadlines         = [];
-                $arrNonHeadlines      = [];
-                $blnTrailingHeadlines = true;
+            foreach ($splitted as $page => $parts) {
+                $headlines         = [];
+                $nonHeadlines      = [];
+                $trailingHeadlines = true;
 
-                for ($i = count($arrParts) - 1; $i > -1; $i--) {
-                    if ($blnTrailingHeadlines && in_array($arrParts[$i]['tag'], ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8', 'h9', 'h10'])) {
-                        $arrHeadlines[] = $arrParts[$i];
+                for ($i = count($parts) - 1; $i > -1; $i--) {
+                    if ($trailingHeadlines && in_array($parts[$i]['tag'], ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8', 'h9', 'h10'])) {
+                        $headlines[] = $parts[$i];
                     } else {
                         // break overlap handling if headline is not trailing
-                        $blnTrailingHeadlines = false;
-                        $arrNonHeadlines[]    = $arrParts[$i];
+                        $trailingHeadlines = false;
+                        $nonHeadlines[]    = $parts[$i];
                     }
                 }
 
-                if (empty($arrResult[$intPage])) {
-                    $arrResult[$intPage] = array_reverse($arrNonHeadlines);
+                if (empty($result[$page])) {
+                    $result[$page] = array_reverse($nonHeadlines);
                 } else {
-                    $arrResult[$intPage] = array_merge($arrResult[$intPage], array_reverse($arrNonHeadlines));
+                    $result[$page] = array_merge($result[$page], array_reverse($nonHeadlines));
                 }
 
-                if (!empty($arrHeadlines)) {
-                    if (empty($arrResult[$intPage + 1])) {
-                        $arrResult[$intPage + 1] = array_reverse($arrHeadlines);
+                if (!empty($headlines)) {
+                    if (empty($result[$page + 1])) {
+                        $result[$page + 1] = array_reverse($headlines);
                     } else {
-                        $arrResult[$intPage + 1] = array_merge(array_reverse($arrHeadlines), $arrResult[$intPage + 1]);
+                        $result[$page + 1] = array_merge(array_reverse($headlines), $result[$page + 1]);
                     }
                 }
             }
         } else {
-            $arrResult = $arrSplitted;
+            $result = $splitted;
         }
 
         // can't be ;-)
-        if ($intCurrentPage > $intPageCount) {
-            $intCurrentPage = $intPageCount;
+        if ($currentPage > $pageCount) {
+            $currentPage = $pageCount;
         }
 
-        foreach ($arrResult as $intPage => $arrParts) {
-            foreach ($arrParts as $arrPart) {
-                if ($intCurrentPage) {
-                    if ($intPage != $intCurrentPage) {
-                        $arrPart['element']->remove();
+        foreach ($result as $page => $parts) {
+            foreach ($parts as $part) {
+                if ($currentPage) {
+                    if ($page != $currentPage) {
+                        $part['element']->remove();
                     }
                 } else {
-                    if ($intPage != 1) {
-                        $arrPart['element']->remove();
+                    if ($page != 1) {
+                        $part['element']->remove();
                     }
                 }
             }
         }
 
-        $objTemplate->text = str_replace(['%7B', '%7D'], ['{', '}'], $objNode->saveHTML());
+        $template->text = str_replace(['%7B', '%7D'], ['{', '}'], $node->saveHTML());
 
         // add pagination
-        $objPagination               =
-            new \Pagination($intPageCount, 1, \Config::get('maxPaginationLinks'), $strPageParam);
-        $objTemplate->newsPagination = $objPagination->generate("\n  ");
+        $pagination               = new Pagination($pageCount, 1, Config::get('maxPaginationLinks'), $pageParam);
+        $template->newsPagination = $pagination->generate("\n  ");
 
         // add head info
 
@@ -243,42 +290,49 @@ class HookListener extends \Controller
         global $objPage;
 
         // path without query string
-        $path = Request::createFromGlobals()->getPathInfo();
-        $url  = \Contao\Environment::get('url') . $path;
+        $path = \Symfony\Component\HttpFoundation\Request::createFromGlobals()->getPathInfo();
+        $url  = Environment::get('url') . $path;
 
         // if path is id, take absolute url from current page
         if (is_numeric(ltrim($path, '/'))) {
             $url = $objPage->getAbsoluteUrl();
         }
 
-        if ($intPageCount > 1) {
-            $canonical = \System::getContainer()->get('huh.head.tag.link_canonical')->getContent();
+        $this->handleMetaTags($pageCount, $currentPage, $pageParam, $module, $url, $article['alias']);
+    }
+
+    public function handleMetaTags(int $pageCount, int $currentPage, string $pageParam, Module $module, string $alias, string $url)
+    {
+        if ($pageCount > 1) {
+            $canonical = $this->linkCanonical->getContent();
 
             // canonical link must contain the current news url or not set
-            if ($objModule->addFullVersionCanonicalLink && $objModule->fullVersionGetParameter && (!$canonical || strpos($canonical, $arrArticle['alias']) !== false)) {
-                \System::getContainer()->get('huh.head.tag.link_canonical')->setContent(
-                    Url::addQueryString($objModule->fullVersionGetParameter . '=1', $url)
+            if ($module->addFullVersionCanonicalLink && $module->fullVersionGetParameter && (!$canonical || strpos($canonical, $alias) !== false)) {
+                $this->linkCanonical->setContent(
+                    $this->urlUtil->addQueryString($module->fullVersionGetParameter . '=1', $url)
                 );
             }
 
             // prev and next links
-            if ($objModule->addPrevNextLinks) {
-                if ($intCurrentPage == 1) {
-                    \System::getContainer()->get('huh.head.tag.link_next')->setContent(
-                        Url::addQueryString($strPageParam . '=2', $url)
+            if ($module->addPrevNextLinks) {
+                if ($currentPage == 1) {
+                    $this->linkNext->setContent(
+                        $this->urlUtil->addQueryString($pageParam . '=2', $url)
                     );
-                } elseif ($intCurrentPage > 1 && $intCurrentPage < $intPageCount) {
-                    \System::getContainer()->get('huh.head.tag.link_prev')->setContent(
-                        Url::addQueryString($strPageParam . '=' . ($intCurrentPage - 1), $url)
+                } elseif ($currentPage > 1 && $currentPage < $pageCount) {
+                    $this->linkPrev->setContent(
+                        $this->urlUtil->addQueryString($pageParam . '=' . ($currentPage - 1), $url)
                     );
 
-                    \System::getContainer()->get('huh.head.tag.link_next')->setContent(
-                        Url::addQueryString($strPageParam . '=' . ($intCurrentPage + 1), $url)
+                    $this->linkNext->setContent(
+                        $this->urlUtil->addQueryString($pageParam . '=' . ($currentPage + 1), $url)
                     );
-                } else if ($intCurrentPage >= $intPageCount) {
-                    \System::getContainer()->get('huh.head.tag.link_prev')->setContent(
-                        Url::addQueryString($strPageParam . '=' . ($intPageCount - 1), $url)
-                    );
+                } else {
+                    if ($currentPage >= $pageCount) {
+                        $this->linkPrev->setContent(
+                            $this->urlUtil->addQueryString($pageParam . '=' . ($pageCount - 1), $url)
+                        );
+                    }
                 }
             }
         }

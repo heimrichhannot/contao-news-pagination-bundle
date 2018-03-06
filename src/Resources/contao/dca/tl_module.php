@@ -6,31 +6,32 @@ $arrDca = &$GLOBALS['TL_DCA']['tl_module'];
  * Palettes
  */
 $arrDca['palettes']['newsreader'] =
-    str_replace('{template_legend', '{pagination_legend},addManualPagination,addPagination;{template_legend', $arrDca['palettes']['newsreader']);
+    str_replace('{template_legend', '{pagination_legend},paginationMode;{template_legend', $arrDca['palettes']['newsreader']);
 
 /**
  * Subpalettes
  */
-$arrDca['palettes']['__selector__'][]   = 'addPagination';
-$arrDca['subpalettes']['addPagination'] = 'paginationMaxCharCount,avoidTrailingHeadlines,paginationCeTextCssSelector,fullVersionGetParameter,addFullVersionCanonicalLink,addPrevNextLinks';
+$arrDca['palettes']['__selector__'][]                                                                                                 = 'paginationMode';
+$arrDca['subpalettes']['paginationMode_' . \HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle::MODE_AUTO]                      =
+    'paginationMaxCharCount,avoidTrailingHeadlines,paginationCeTextCssSelector,fullVersionGetParameter,acceptPrintGetParameter,addFullVersionCanonicalLink,addPrevNextLinks';
+$arrDca['subpalettes']['paginationMode_' . \HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle::MODE_MANUAL]                    =
+    'fullVersionGetParameter,acceptPrintGetParameter,addFullVersionCanonicalLink,addPrevNextLinks';
+$arrDca['subpalettes']['paginationMode_' . \HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle::MODE_MANUAL_WITH_AUTO_FALLBACK] =
+    'paginationMaxCharCount,avoidTrailingHeadlines,paginationCeTextCssSelector,fullVersionGetParameter,acceptPrintGetParameter,addFullVersionCanonicalLink,addPrevNextLinks';
 
 /**
  * Fields
  */
 $arrFields = [
-    'addManualPagination'         => [
-        'label'     => &$GLOBALS['TL_LANG']['tl_module']['addManualPagination'],
+    'paginationMode'              => [
+        'label'     => &$GLOBALS['TL_LANG']['tl_module']['paginationMode'],
         'exclude'   => true,
-        'inputType' => 'checkbox',
-        'eval'      => ['tl_class' => 'w50'],
-        'sql'       => "char(1) NOT NULL default ''"
-    ],
-    'addPagination'               => [
-        'label'     => &$GLOBALS['TL_LANG']['tl_module']['addPagination'],
-        'exclude'   => true,
-        'inputType' => 'checkbox',
-        'eval'      => ['tl_class' => 'w50', 'submitOnChange' => true],
-        'sql'       => "char(1) NOT NULL default ''"
+        'filter'    => true,
+        'inputType' => 'select',
+        'options'   => \HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle::MODES,
+        'reference' => &$GLOBALS['TL_LANG']['tl_module']['reference']['newsPaginationBundle'],
+        'eval'      => ['tl_class' => 'w50', 'includeBlankOption' => true, 'submitOnChange' => true],
+        'sql'       => "varchar(64) NOT NULL default ''"
     ],
     'paginationMaxCharCount'      => [
         'label'     => &$GLOBALS['TL_LANG']['tl_module']['paginationMaxCharCount'],
@@ -59,7 +60,14 @@ $arrFields = [
         'search'    => true,
         'inputType' => 'text',
         'eval'      => ['maxlength' => 255, 'tl_class' => 'w50'],
-        'sql'       => "varchar(255) NOT NULL default 'print'"
+        'sql'       => "varchar(255) NOT NULL default 'full'"
+    ],
+    'acceptPrintGetParameter'     => [
+        'label'     => &$GLOBALS['TL_LANG']['tl_module']['acceptPrintGetParameter'],
+        'exclude'   => true,
+        'inputType' => 'checkbox',
+        'eval'      => ['tl_class' => 'w50'],
+        'sql'       => "char(1) NOT NULL default ''"
     ],
     'addFullVersionCanonicalLink' => [
         'label'     => &$GLOBALS['TL_LANG']['tl_module']['addFullVersionCanonicalLink'],

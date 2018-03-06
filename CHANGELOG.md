@@ -1,6 +1,17 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.0.0] - 2018-03-06
+
+### Added
+- disjoint paginationMode
+- new mode "manual with automatic fallback"
+- dependency to heimrichhannot/contao-request
+- meta tag handling for manual pagination
+
+### Changed
+- dependency from heimrichhannot/contao-haste_plus to heimrichhannot/contao-utils-bundle
+
 ## [1.0.6] - 2018-01-17
 
 ### Added

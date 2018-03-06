@@ -3,57 +3,60 @@
 namespace HeimrichHannot\NewsPagination\Backend;
 
 
+use Contao\ContentModel;
+use Contao\Database;
+use Contao\DataContainer;
 use HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle;
 
 class Content extends \Backend
 {
-    public static function addNewsPaginationStopElement(\DataContainer $objDc)
+    public static function addNewsPaginationStopElement(DataContainer $dc)
     {
-        if (($objElement = \ContentModel::findByPk($objDc->id)) === null
-            || $objElement->type !== NewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_START
-            || $objElement->newsPaginationStopCreated
+        if (($element = ContentModel::findByPk($dc->id)) === null
+            || $element->type !== NewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_START
+            || $element->newsPaginationStopCreated
         )
         {
             return;
         }
 
-        $objElement->newsPaginationStopCreated = true;
-        $objElement->save();
+        $element->newsPaginationStopCreated = true;
+        $element->save();
 
-        $objElements = \ContentModel::findBy(
+        $elements = ContentModel::findBy(
             ['tl_content.ptable=?', 'tl_content.pid=?'],
             [
-                $objElement->ptable,
-                $objElement->pid
+                $element->ptable,
+                $element->pid
             ],
             ['order' => 'tl_content.sorting']
         );
 
         // create the stop element
-        $objStop = new \ContentModel();
+        $stop = new ContentModel();
 
-        $objStop->tstamp  = time();
-        $objStop->ptable  = $objElement->ptable;
-        $objStop->pid     = $objElement->pid;
-        $objStop->sorting = $objElement->sorting;
-        $objStop->type    = NewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_STOP;
+        $stop->tstamp  = time();
+        $stop->ptable  = $element->ptable;
+        $stop->pid     = $element->pid;
+        $stop->sorting = $element->sorting;
+        $stop->type    = NewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_STOP;
 
-        $objStop->save();
+        $stop->save();
 
         // update sorting
         $i = 0;
 
-        if ($objElements !== null)
+        if ($elements !== null)
         {
-            $arrIds = $objElements->fetchEach('id');
+            $ids = $elements->fetchEach('id');
 
-            array_insert($arrIds, array_search($objDc->id, $arrIds) + 1, [
-                $objStop->id
+            array_insert($ids, array_search($dc->id, $ids) + 1, [
+                $stop->id
             ]);
 
-            foreach ($arrIds as $intId)
+            foreach ($ids as $id)
             {
-                \Database::getInstance()->prepare('UPDATE tl_content SET sorting=? WHERE id=?')->execute(++$i * 128, $intId);
+                Database::getInstance()->prepare('UPDATE tl_content SET sorting=? WHERE id=?')->execute(++$i * 128, $id);
             }
         }
     }

@@ -3,3 +3,7 @@ services:
         class: HeimrichHannot\NewsPaginationBundle\EventListener\HookListener
         arguments:
             - "@contao.framework"
+            - "@huh.head.tag.link_canonical"
+            - "@huh.head.tag.link_prev"
+            - "@huh.head.tag.link_next"
+            - "@huh.utils.url"

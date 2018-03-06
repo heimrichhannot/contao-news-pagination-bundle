@@ -3,7 +3,9 @@
 namespace HeimrichHannot\NewsPaginationBundle\Element;
 
 
-class NewsPaginationStart extends \ContentElement
+use Contao\ContentElement;
+
+class NewsPaginationStart extends ContentElement
 {
     protected $strTemplate = 'ce_news_pagination_start';
 
@@ -11,8 +13,7 @@ class NewsPaginationStart extends \ContentElement
 
     public function generate()
     {
-        if (TL_MODE == 'BE')
-        {
+        if (TL_MODE == 'BE') {
             return '';
         }
 
@@ -21,25 +22,23 @@ class NewsPaginationStart extends \ContentElement
 
     protected function compile()
     {
-        $arrElements = static::$arrElementsCache;
+        $elements = static::$arrElementsCache;
 
-        if (empty($arrElements))
-        {
+        if (empty($elements)) {
             // get index in current news
-            $objElements =
+            $elementObj =
                 \Database::getInstance()->prepare('SELECT id FROM tl_content WHERE type=? AND ptable=? AND pid=? ORDER BY sorting')->execute(
                     $this->type,
                     $this->ptable,
                     $this->pid
                 );
 
-            if ($objElements->numRows > 0)
-            {
-                $arrElements = $objElements->fetchEach('id');
+            if ($elementObj->numRows > 0) {
+                $elements = $elementObj->fetchEach('id');
             }
         }
 
-        $intIndex              = array_search($this->id, $arrElements);
-        $this->Template->index = $intIndex > -1 ? $intIndex + 1 : 0;
+        $index                 = array_search($this->id, $elements);
+        $this->Template->index = $index > -1 ? $index + 1 : 0;
     }
 }
