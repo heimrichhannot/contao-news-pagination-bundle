@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.0.1] - 2018-03-06
+
+### Fixed
+- urls with urldecodable characters
+- prev and next links for first and last pages
+
 ## [2.0.0] - 2018-03-06
 
 ### Added

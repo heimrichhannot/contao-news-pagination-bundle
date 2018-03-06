@@ -139,7 +139,7 @@ class HookListener extends \Controller
         $path = \Symfony\Component\HttpFoundation\Request::createFromGlobals()->getPathInfo();
         $url  = Environment::get('url') . $path;
 
-        $this->handleMetaTags($maxIndex, $page, $pageParam, $module, $url, $article['alias']);
+        $this->handleMetaTags($maxIndex, $page, $pageParam, $module, $article['alias'], $url);
     }
 
     public function doAddNewsPagination(Template $template, array $article, Module $module)
@@ -298,7 +298,7 @@ class HookListener extends \Controller
             $url = $objPage->getAbsoluteUrl();
         }
 
-        $this->handleMetaTags($pageCount, $currentPage, $pageParam, $module, $url, $article['alias']);
+        $this->handleMetaTags($pageCount, $currentPage, $pageParam, $module, $article['alias'], $url);
     }
 
     public function handleMetaTags(int $pageCount, int $currentPage, string $pageParam, Module $module, string $alias, string $url)
@@ -307,7 +307,7 @@ class HookListener extends \Controller
             $canonical = $this->linkCanonical->getContent();
 
             // canonical link must contain the current news url or not set
-            if ($module->addFullVersionCanonicalLink && $module->fullVersionGetParameter && (!$canonical || strpos($canonical, $alias) !== false)) {
+            if ($module->addFullVersionCanonicalLink && $module->fullVersionGetParameter && (!$canonical || strpos($canonical, urlencode($alias)) !== false)) {
                 $this->linkCanonical->setContent(
                     $this->urlUtil->addQueryString($module->fullVersionGetParameter . '=1', $url)
                 );
@@ -316,6 +316,8 @@ class HookListener extends \Controller
             // prev and next links
             if ($module->addPrevNextLinks) {
                 if ($currentPage == 1) {
+                    $this->linkPrev->setContent('');
+
                     $this->linkNext->setContent(
                         $this->urlUtil->addQueryString($pageParam . '=2', $url)
                     );
@@ -332,6 +334,8 @@ class HookListener extends \Controller
                         $this->linkPrev->setContent(
                             $this->urlUtil->addQueryString($pageParam . '=' . ($pageCount - 1), $url)
                         );
+
+                        $this->linkNext->setContent('');
                     }
                 }
             }
