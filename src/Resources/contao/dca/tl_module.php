@@ -11,13 +11,16 @@ $arrDca['palettes']['newsreader'] =
 /**
  * Subpalettes
  */
-$arrDca['palettes']['__selector__'][]                                                                                                 = 'paginationMode';
+$arrDca['palettes']['__selector__'][] = 'paginationMode';
+$arrDca['palettes']['__selector__'][] = 'addTextualPagination';
+
 $arrDca['subpalettes']['paginationMode_' . \HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle::MODE_AUTO]                      =
-    'paginationMaxCharCount,avoidTrailingHeadlines,paginationCeTextCssSelector,fullVersionGetParameter,acceptPrintGetParameter,addFullVersionCanonicalLink,addPrevNextLinks';
+    'addTextualPagination,paginationMaxCharCount,avoidTrailingHeadlines,paginationCeTextCssSelector,fullVersionGetParameter,acceptPrintGetParameter,addFullVersionCanonicalLink,addPrevNextLinks';
 $arrDca['subpalettes']['paginationMode_' . \HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle::MODE_MANUAL]                    =
-    'fullVersionGetParameter,acceptPrintGetParameter,addFullVersionCanonicalLink,addPrevNextLinks';
+    'addTextualPagination,fullVersionGetParameter,acceptPrintGetParameter,addFullVersionCanonicalLink,addPrevNextLinks';
 $arrDca['subpalettes']['paginationMode_' . \HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle::MODE_MANUAL_WITH_AUTO_FALLBACK] =
-    'paginationMaxCharCount,avoidTrailingHeadlines,paginationCeTextCssSelector,fullVersionGetParameter,acceptPrintGetParameter,addFullVersionCanonicalLink,addPrevNextLinks';
+    'addTextualPagination,paginationMaxCharCount,avoidTrailingHeadlines,paginationCeTextCssSelector,fullVersionGetParameter,acceptPrintGetParameter,addFullVersionCanonicalLink,addPrevNextLinks';
+$arrDca['subpalettes']['addTextualPagination'] = 'textPaginationDelimiter,textPaginationMaxCharCount,textPaginationAddReadOnSinglePage';
 
 /**
  * Fields
@@ -32,6 +35,36 @@ $arrFields = [
         'reference' => &$GLOBALS['TL_LANG']['tl_module']['reference']['newsPaginationBundle'],
         'eval'      => ['tl_class' => 'w50', 'includeBlankOption' => true, 'submitOnChange' => true],
         'sql'       => "varchar(64) NOT NULL default ''"
+    ],
+    'addTextualPagination'        => [
+        'label'     => &$GLOBALS['TL_LANG']['tl_module']['addTextualPagination'],
+        'exclude'   => true,
+        'inputType' => 'checkbox',
+        'eval'      => ['tl_class' => 'w50', 'submitOnChange' => true],
+        'sql'       => "char(1) NOT NULL default ''"
+    ],
+    'textPaginationDelimiter'     => [
+        'label'     => &$GLOBALS['TL_LANG']['tl_module']['textPaginationDelimiter'],
+        'exclude'   => true,
+        'search'    => true,
+        'inputType' => 'text',
+        'eval'      => ['maxlength' => 8, 'tl_class' => 'w50', 'mandatory' => true],
+        'sql'       => "varchar(8) NOT NULL default '…'"
+    ],
+    'textPaginationMaxCharCount'  => [
+        'label'     => &$GLOBALS['TL_LANG']['tl_module']['textPaginationMaxCharCount'],
+        'exclude'   => true,
+        'search'    => true,
+        'inputType' => 'text',
+        'eval'      => ['rgxp' => 'digit', 'maxlength' => 10, 'tl_class' => 'w50', 'mandatory' => true],
+        'sql'       => "int(10) unsigned NOT NULL default '80'"
+    ],
+    'textPaginationAddReadOnSinglePage' => [
+        'label'                   => &$GLOBALS['TL_LANG']['tl_module']['textPaginationAddReadOnSinglePage'],
+        'exclude'                 => true,
+        'inputType'               => 'checkbox',
+        'eval'                    => ['tl_class' => 'w50'],
+        'sql'                     => "char(1) NOT NULL default ''"
     ],
     'paginationMaxCharCount'      => [
         'label'     => &$GLOBALS['TL_LANG']['tl_module']['paginationMaxCharCount'],

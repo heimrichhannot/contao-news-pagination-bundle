@@ -1,6 +1,16 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.1.0] - 2018-03-06
+
+### Added
+- textual pagination
+- refactoring
+- dependency to heimrichhannot/contao-utils-bundle
+
+### Removed
+- unnecessary redundant dependencies
+
 ## [2.0.1] - 2018-03-06
 
 ### Fixed

@@ -14,3 +14,6 @@ $GLOBALS['TL_LANG']['CTE'][\HeimrichHannot\NewsPaginationBundle\NewsPaginationBu
     'Paginierungsabschnitt Ende';
 $GLOBALS['TL_LANG']['CTE'][\HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_STOP][1] =
     'Definiert den Start eines Paginierungsabschnitts';
+
+$GLOBALS['TL_LANG']['MSC']['toc'] = 'Inhalt';
+$GLOBALS['TL_LANG']['MSC']['readOnSinglePage'] = 'Auf einer Seite lesen';

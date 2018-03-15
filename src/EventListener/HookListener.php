@@ -14,9 +14,10 @@ use HeimrichHannot\HeadBundle\Tag\Link\LinkNext;
 use HeimrichHannot\HeadBundle\Tag\Link\LinkPrev;
 use HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle;
 use HeimrichHannot\Request\Request;
+use HeimrichHannot\UtilsBundle\Pagination\TextualPagination;
+use HeimrichHannot\UtilsBundle\String\StringUtil;
 use HeimrichHannot\UtilsBundle\Url\UrlUtil;
 use Wa72\HtmlPageDom\HtmlPageCrawler;
-use Contao\StringUtil;
 
 class HookListener extends \Controller
 {
@@ -45,18 +46,25 @@ class HookListener extends \Controller
      */
     private $urlUtil;
 
+    /**
+     * @var StringUtil
+     */
+    private $stringUtil;
+
     public function __construct(
         ContaoFrameworkInterface $framework,
         LinkCanonical $linkCanonical,
         LinkPrev $linkPrev,
         LinkNext $linkNext,
-        UrlUtil $urlUtil
+        UrlUtil $urlUtil,
+        StringUtil $stringUtil
     ) {
         $this->framework     = $framework;
         $this->linkCanonical = $linkCanonical;
         $this->linkPrev      = $linkPrev;
         $this->linkNext      = $linkNext;
         $this->urlUtil       = $urlUtil;
+        $this->stringUtil    = $stringUtil;
     }
 
     static $manualPaginationFound = false;
@@ -81,8 +89,7 @@ class HookListener extends \Controller
             return;
         }
 
-        switch ($module->paginationMode)
-        {
+        switch ($module->paginationMode) {
             case NewsPaginationBundle::MODE_AUTO:
                 $this->doAddNewsPagination($template, $article, $module);
                 break;
@@ -103,10 +110,11 @@ class HookListener extends \Controller
     {
         $pageParam = 'page_n' . $module->id;
         $page      = Request::getGet($pageParam) ?: 1;
-        $maxIndex  = 0;
+        $pageCount  = 0;
+        $teaserData   = [];
 
         // add wrapper div since remove() called on root elements doesn't work (bug?)
-        $node          = new HtmlPageCrawler('<div><div class="news-pagination-content">' . StringUtil::restoreBasicEntities($template->text) . '</div></div>');
+        $node          = new HtmlPageCrawler('<div><div class="news-pagination-content">' . \Contao\StringUtil::restoreBasicEntities($template->text) . '</div></div>');
         $startElements = $node->filter('.news-pagination-content > [class*="ce_news_pagination_start"]');
 
         if ($startElements->count() < 1) {
@@ -116,11 +124,15 @@ class HookListener extends \Controller
         static::$manualPaginationFound = true;
 
         $startElements->each(
-            function ($element) use ($page, &$maxIndex) {
+            function ($element) use ($page, &$pageCount, &$teaserData) {
                 $intIndex = $element->getAttribute('data-index');
 
-                if ($intIndex > $maxIndex) {
-                    $maxIndex = $intIndex;
+                $teaserData[$intIndex] = [[
+                    'text' => $element->getAttribute('data-pagination-title') ?: trim($element->text())
+                ]];
+
+                if ($intIndex > $pageCount) {
+                    $pageCount = $intIndex;
                 }
 
                 if ($page != $intIndex) {
@@ -131,15 +143,15 @@ class HookListener extends \Controller
 
         $template->text = str_replace(['%7B', '%7D'], ['{', '}'], $node->saveHTML());
 
-        // add pagination
-        $pagination               = new Pagination($maxIndex, 1, Config::get('maxPaginationLinks'), $pageParam);
-        $template->newsPagination = $pagination->generate("\n  ");
-
         // path without query string
         $path = \Symfony\Component\HttpFoundation\Request::createFromGlobals()->getPathInfo();
         $url  = Environment::get('url') . $path;
 
-        $this->handleMetaTags($maxIndex, $page, $pageParam, $module, $article['alias'], $url);
+        // add pagination
+        $singlePageUrl = $this->urlUtil->addQueryString($module->fullVersionGetParameter . '=1', $url);
+        $this->addPagination($template, $teaserData, $module, $pageCount, $pageParam, $singlePageUrl);
+
+        $this->handleMetaTags($pageCount, $page, $pageParam, $module, $article['alias'], $url);
     }
 
     public function doAddNewsPagination(Template $template, array $article, Module $module)
@@ -151,7 +163,7 @@ class HookListener extends \Controller
         $pageCount = 1;
 
         // add wrapper div since remove() called on root elements doesn't work (bug?)
-        $node              = new HtmlPageCrawler('<div><div class="news-pagination-content">' . StringUtil::restoreBasicEntities($template->text) . '</div></div>');
+        $node              = new HtmlPageCrawler('<div><div class="news-pagination-content">' . \Contao\StringUtil::restoreBasicEntities($template->text) . '</div></div>');
         $textAmount        = 0;
         $ceTextCssSelector = $module->paginationCeTextCssSelector;
         $tags              = static::$tags;
@@ -183,19 +195,19 @@ class HookListener extends \Controller
                     }
 
                     $element->children()->each(
-                        function ($objElement) use (&$intTextAmount, $textAmount, $tags, &$pageCount, &$elements) {
+                        function ($element) use (&$intTextAmount, $textAmount, $tags, &$pageCount, &$elements) {
                             $elements[] = [
-                                'element' => $objElement,
-                                'text'    => $objElement->text(),
-                                'tag'     => $objElement->nodeName(),
-                                'length'  => strlen($objElement->text())
+                                'element' => $element,
+                                'text'    => trim($element->text()),
+                                'tag'     => $element->nodeName(),
+                                'length'  => strlen($element->text())
                             ];
                         }
                     );
                 } else {
                     $elements[] = [
                         'element' => $element,
-                        'text'    => $element->text(),
+                        'text'    => trim($element->text()),
                         'tag'     => $element->nodeName(),
                         'length'  => 0
                     ];
@@ -280,12 +292,6 @@ class HookListener extends \Controller
 
         $template->text = str_replace(['%7B', '%7D'], ['{', '}'], $node->saveHTML());
 
-        // add pagination
-        $pagination               = new Pagination($pageCount, 1, Config::get('maxPaginationLinks'), $pageParam);
-        $template->newsPagination = $pagination->generate("\n  ");
-
-        // add head info
-
         /** @var $objPage \Contao\PageModel */
         global $objPage;
 
@@ -298,7 +304,81 @@ class HookListener extends \Controller
             $url = $objPage->getAbsoluteUrl();
         }
 
+        // add pagination
+        $singlePageUrl = $this->urlUtil->addQueryString($module->fullVersionGetParameter . '=1', $url);
+        $this->addPagination($template, $result, $module, $pageCount, $pageParam, $singlePageUrl);
+
+        // add head info
         $this->handleMetaTags($pageCount, $currentPage, $pageParam, $module, $article['alias'], $url);
+    }
+
+    protected function addPagination(Template $template, array $teaserData, Module $module, int $pageCount, string $pageParam, string $singlePageUrl)
+    {
+        // normal pagination
+        $pagination = new Pagination($pageCount, 1, Config::get('maxPaginationLinks'), $pageParam);
+
+        $template->newsPagination = $pagination->generate("\n  ");
+
+        // textual pagination
+        if ($module->addTextualPagination) {
+            $teasers = $this->createPageTeasers($teaserData, $module);
+
+            // always show all truncated teasers
+            $pagination = new TextualPagination($teasers, $singlePageUrl, $pageCount, 1, 999, $pageParam);
+
+            $template->textualPagination = $pagination->generate("\n  ");
+        }
+    }
+
+    protected function createPageTeasers(array $splitted, Module $module): array
+    {
+        // create teasers for textual pagination
+        $teasers = [];
+
+        foreach ($splitted as $page => $data)
+        {
+            $teaserParts = [];
+            $textLength = 0;
+            $maxCountExceeded = false;
+
+            foreach ($data as $i => $element)
+            {
+                $elementLength = strlen($element['text']);
+
+                if ($elementLength > $module->textPaginationMaxCharCount)
+                {
+                    $truncated = $this->stringUtil->truncateHtml($element['text'], $module->textPaginationMaxCharCount, '');
+
+                    if (strlen($truncated) + $textLength > $module->textPaginationMaxCharCount)
+                    {
+                        $maxCountExceeded = true;
+                        continue;
+                    }
+
+                    if ($i === count($data) - 1)
+                    {
+                        $maxCountExceeded = true;
+                    }
+
+                    $teaserParts[] = $truncated;
+                    $textLength += strlen($truncated);
+                }
+                else
+                {
+                    if ($elementLength + $textLength > $module->textPaginationMaxCharCount)
+                    {
+                        continue;
+                    }
+
+                    $teaserParts[] = $element['text'];
+                    $textLength += $elementLength;
+                }
+            }
+
+            $teasers[$page] = implode(' ', $teaserParts) . ($maxCountExceeded ? $module->textPaginationDelimiter : '');
+        }
+
+        return $teasers;
     }
 
     public function handleMetaTags(int $pageCount, int $currentPage, string $pageParam, Module $module, string $alias, string $url)

@@ -7,3 +7,4 @@ services:
             - "@huh.head.tag.link_prev"
             - "@huh.head.tag.link_next"
             - "@huh.utils.url"
+            - "@huh.utils.string"
