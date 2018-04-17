@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.1.1] - 2018-04-17
+
+### Added
+- singlepage_pagination template
+
+### Changed
+- addPagination function
+
 ## [2.1.0] - 2018-03-06
 
 ### Added
