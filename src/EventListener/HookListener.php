@@ -6,6 +6,7 @@ namespace HeimrichHannot\NewsPaginationBundle\EventListener;
 use Contao\Config;
 use Contao\CoreBundle\Framework\ContaoFrameworkInterface;
 use Contao\Environment;
+use Contao\FrontendTemplate;
 use Contao\Module;
 use Contao\Pagination;
 use Contao\Template;
@@ -75,7 +76,7 @@ class HookListener extends \Controller
         'strong',
         'i',
         'em',
-        'div'
+        'div',
     ];
 
     public function addNewsPagination(Template $template, array $article, Module $module)
@@ -83,9 +84,8 @@ class HookListener extends \Controller
         $template->module = $module;
 
         // no pagination if full version parameter is set
-        if ($module->fullVersionGetParameter && Request::getGet($module->fullVersionGetParameter) ||
-            $module->acceptPrintGetParameter && Request::getGet('print')
-        ) {
+        if ($module->fullVersionGetParameter && Request::getGet($module->fullVersionGetParameter)
+            || $module->acceptPrintGetParameter && Request::getGet('print')) {
             return;
         }
 
@@ -108,10 +108,10 @@ class HookListener extends \Controller
 
     public function doAddManualNewsPagination(Template $template, array $article, Module $module)
     {
-        $pageParam = 'page_n' . $module->id;
-        $page      = Request::getGet($pageParam) ?: 1;
+        $pageParam  = 'page_n' . $module->id;
+        $page       = Request::getGet($pageParam) ?: 1;
         $pageCount  = 0;
-        $teaserData   = [];
+        $teaserData = [];
 
         // add wrapper div since remove() called on root elements doesn't work (bug?)
         $node          = new HtmlPageCrawler('<div><div class="news-pagination-content">' . \Contao\StringUtil::restoreBasicEntities($template->text) . '</div></div>');
@@ -123,23 +123,23 @@ class HookListener extends \Controller
 
         static::$manualPaginationFound = true;
 
-        $startElements->each(
-            function ($element) use ($page, &$pageCount, &$teaserData) {
-                $intIndex = $element->getAttribute('data-index');
+        $startElements->each(function ($element) use ($page, &$pageCount, &$teaserData) {
+            $intIndex = $element->getAttribute('data-index');
 
-                $teaserData[$intIndex] = [[
-                    'text' => $element->getAttribute('data-pagination-title') ?: trim($element->text())
-                ]];
+            $teaserData[$intIndex] = [
+                [
+                    'text' => $element->getAttribute('data-pagination-title') ?: trim($element->text()),
+                ],
+            ];
 
-                if ($intIndex > $pageCount) {
-                    $pageCount = $intIndex;
-                }
-
-                if ($page != $intIndex) {
-                    $element->remove();
-                }
+            if ($intIndex > $pageCount) {
+                $pageCount = $intIndex;
             }
-        );
+
+            if ($page != $intIndex) {
+                $element->remove();
+            }
+        });
 
         $template->text = str_replace(['%7B', '%7D'], ['{', '}'], $node->saveHTML());
 
@@ -169,51 +169,43 @@ class HookListener extends \Controller
         $tags              = static::$tags;
 
         // replace multiple br elements to
-        $node->filter('.news-pagination-content > [class*="ce_"]')->each(
-            function ($element) use (&$textAmount, $maxAmount, $tags, $node, $ceTextCssSelector) {
-                if (strpos($element->getAttribute('class'), 'ce_text') !== false && strpos($element->html(), 'figure') === false) {
-                    $element->children($ceTextCssSelector . ', figure')->each(
-                        function ($paragraph) use (&$textAmount, $maxAmount, $tags) {
-                            $paragraph->html(preg_replace('@<br\s?\/?><br\s?\/?>@i', '</p><p>', $paragraph->html()));
-                        });
-                }
+        $node->filter('.news-pagination-content > [class*="ce_"]')->each(function ($element) use (&$textAmount, $maxAmount, $tags, $node, $ceTextCssSelector) {
+            if (strpos($element->getAttribute('class'), 'ce_text') !== false && strpos($element->html(), 'figure') === false) {
+                $element->children($ceTextCssSelector . ', figure')->each(function ($paragraph) use (&$textAmount, $maxAmount, $tags) {
+                    $paragraph->html(preg_replace('@<br\s?\/?><br\s?\/?>@i', '</p><p>', $paragraph->html()));
+                });
             }
-        );
+        });
 
         // pagination
         $node     = new HtmlPageCrawler($node->saveHTML());
         $elements = [];
 
         // get relevant elements
-        $node->filter('.news-pagination-content > [class*="ce_"]')->each(
-            function ($element) use (&$textAmount, $maxAmount, $tags, $node, $ceTextCssSelector, &$pageCount, &$elements) {
-                if (strpos($element->getAttribute('class'), 'ce_text') !== false &&
-                    strpos($element->html(), 'figure') === false
-                ) {
-                    if ($ceTextCssSelector) {
-                        $element = $element->filter($ceTextCssSelector);
-                    }
+        $node->filter('.news-pagination-content > [class*="ce_"]')->each(function ($element) use (&$textAmount, $maxAmount, $tags, $node, $ceTextCssSelector, &$pageCount, &$elements) {
+            if (strpos($element->getAttribute('class'), 'ce_text') !== false
+                && strpos($element->html(), 'figure') === false) {
+                if ($ceTextCssSelector) {
+                    $element = $element->filter($ceTextCssSelector);
+                }
 
-                    $element->children()->each(
-                        function ($element) use (&$intTextAmount, $textAmount, $tags, &$pageCount, &$elements) {
-                            $elements[] = [
-                                'element' => $element,
-                                'text'    => trim($element->text()),
-                                'tag'     => $element->nodeName(),
-                                'length'  => strlen($element->text())
-                            ];
-                        }
-                    );
-                } else {
+                $element->children()->each(function ($element) use (&$intTextAmount, $textAmount, $tags, &$pageCount, &$elements) {
                     $elements[] = [
                         'element' => $element,
                         'text'    => trim($element->text()),
                         'tag'     => $element->nodeName(),
-                        'length'  => 0
+                        'length'  => strlen($element->text()),
                     ];
-                }
+                });
+            } else {
+                $elements[] = [
+                    'element' => $element,
+                    'text'    => trim($element->text()),
+                    'tag'     => $element->nodeName(),
+                    'length'  => 0,
+                ];
             }
-        );
+        });
 
         // split array by text amounts
         $splitted = [];
@@ -314,8 +306,31 @@ class HookListener extends \Controller
 
     protected function addPagination(Template $template, array $teaserData, Module $module, int $pageCount, string $pageParam, string $singlePageUrl)
     {
+        $paginationTemplate = null;
+
+        if ($module->textPaginationAddReadOnSinglePage) {
+            $paginationTemplate                  = new FrontendTemplate('singlepage_pagination');
+            $paginationTemplate->singlePageUrl   = $singlePageUrl;
+            $paginationTemplate->singlePageLabel = $GLOBALS['TL_LANG']['MSC']['readOnSinglePage'];
+            $paginationTemplate->justSinglePage  = true;
+        }
+
         // normal pagination
-        $pagination = new Pagination($pageCount, 1, Config::get('maxPaginationLinks'), $pageParam);
+        $pagination = new Pagination($pageCount, 1, Config::get('maxPaginationLinks'), $pageParam, $paginationTemplate);
+
+        $template->singlePagePagination = $pagination->generate("\n  ");
+
+        $paginationTemplate = null;
+
+        if ($module->textPaginationAddReadOnSinglePage) {
+            $paginationTemplate                  = new FrontendTemplate('singlepage_pagination');
+            $paginationTemplate->singlePageUrl   = $singlePageUrl;
+            $paginationTemplate->singlePageLabel = $GLOBALS['TL_LANG']['MSC']['readOnSinglePage'];
+            $paginationTemplate->justSinglePage  = false;
+        }
+
+        // normal pagination
+        $pagination = new Pagination($pageCount, 1, Config::get('maxPaginationLinks'), $pageParam, $paginationTemplate);
 
         $template->newsPagination = $pagination->generate("\n  ");
 
@@ -335,43 +350,35 @@ class HookListener extends \Controller
         // create teasers for textual pagination
         $teasers = [];
 
-        foreach ($splitted as $page => $data)
-        {
-            $teaserParts = [];
-            $textLength = 0;
+        foreach ($splitted as $page => $data) {
+            $teaserParts      = [];
+            $textLength       = 0;
             $maxCountExceeded = false;
 
-            foreach ($data as $i => $element)
-            {
+            foreach ($data as $i => $element) {
                 $elementLength = strlen($element['text']);
 
-                if ($elementLength > $module->textPaginationMaxCharCount)
-                {
+                if ($elementLength > $module->textPaginationMaxCharCount) {
                     $truncated = $this->stringUtil->truncateHtml($element['text'], $module->textPaginationMaxCharCount, '');
 
-                    if (strlen($truncated) + $textLength > $module->textPaginationMaxCharCount)
-                    {
+                    if (strlen($truncated) + $textLength > $module->textPaginationMaxCharCount) {
                         $maxCountExceeded = true;
                         continue;
                     }
 
-                    if ($i === count($data) - 1)
-                    {
+                    if ($i === count($data) - 1) {
                         $maxCountExceeded = true;
                     }
 
                     $teaserParts[] = $truncated;
-                    $textLength += strlen($truncated);
-                }
-                else
-                {
-                    if ($elementLength + $textLength > $module->textPaginationMaxCharCount)
-                    {
+                    $textLength    += strlen($truncated);
+                } else {
+                    if ($elementLength + $textLength > $module->textPaginationMaxCharCount) {
                         continue;
                     }
 
                     $teaserParts[] = $element['text'];
-                    $textLength += $elementLength;
+                    $textLength    += $elementLength;
                 }
             }
 
@@ -388,9 +395,7 @@ class HookListener extends \Controller
 
             // canonical link must contain the current news url or not set
             if ($module->addFullVersionCanonicalLink && $module->fullVersionGetParameter && (!$canonical || strpos($canonical, urlencode($alias)) !== false)) {
-                $this->linkCanonical->setContent(
-                    $this->urlUtil->addQueryString($module->fullVersionGetParameter . '=1', $url)
-                );
+                $this->linkCanonical->setContent($this->urlUtil->addQueryString($module->fullVersionGetParameter . '=1', $url));
             }
 
             // prev and next links
@@ -398,22 +403,14 @@ class HookListener extends \Controller
                 if ($currentPage == 1) {
                     $this->linkPrev->setContent('');
 
-                    $this->linkNext->setContent(
-                        $this->urlUtil->addQueryString($pageParam . '=2', $url)
-                    );
+                    $this->linkNext->setContent($this->urlUtil->addQueryString($pageParam . '=2', $url));
                 } elseif ($currentPage > 1 && $currentPage < $pageCount) {
-                    $this->linkPrev->setContent(
-                        $this->urlUtil->addQueryString($pageParam . '=' . ($currentPage - 1), $url)
-                    );
+                    $this->linkPrev->setContent($this->urlUtil->addQueryString($pageParam . '=' . ($currentPage - 1), $url));
 
-                    $this->linkNext->setContent(
-                        $this->urlUtil->addQueryString($pageParam . '=' . ($currentPage + 1), $url)
-                    );
+                    $this->linkNext->setContent($this->urlUtil->addQueryString($pageParam . '=' . ($currentPage + 1), $url));
                 } else {
                     if ($currentPage >= $pageCount) {
-                        $this->linkPrev->setContent(
-                            $this->urlUtil->addQueryString($pageParam . '=' . ($pageCount - 1), $url)
-                        );
+                        $this->linkPrev->setContent($this->urlUtil->addQueryString($pageParam . '=' . ($pageCount - 1), $url));
 
                         $this->linkNext->setContent('');
                     }
