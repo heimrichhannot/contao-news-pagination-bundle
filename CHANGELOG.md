@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.1.3] - 2018-06-04
+
+### Fixed
+- canonical tag and prev/next
+
 ## [2.1.2] - 2018-04-20
 
 ### Added

@@ -83,6 +83,10 @@ class HookListener extends \Controller
     {
         $template->module = $module;
 
+        $this->linkCanonical->setContent($this->urlUtil->getCurrentUrl([]));
+        $this->linkPrev->setContent('');
+        $this->linkNext->setContent('');
+
         // no pagination if full version parameter is set
         if ($module->fullVersionGetParameter && Request::getGet($module->fullVersionGetParameter)
             || $module->acceptPrintGetParameter && Request::getGet('print')) {
