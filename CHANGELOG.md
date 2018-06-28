@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.1.4] - 2018-06-28
+
+### Changed
+- removed singlepage_pagination and added custom pagination template
+
 ## [2.1.3] - 2018-06-04
 
 ### Fixed

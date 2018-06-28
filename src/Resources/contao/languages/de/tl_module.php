@@ -29,9 +29,8 @@ $lang['acceptPrintGetParameter'][0]           = 'GET-Parameter "print" für nich
 $lang['acceptPrintGetParameter'][1]           = 'Wählen Sie diese Option, damit die nichtpaginierte Version der Nachricht angezeigt wird, wenn der Parameter "print" vorhanden ist. Sinnvoll für eine Druckenfunktion.';
 $lang['setPrevNextLinks'][0]                  = 'Prev- und Next-Links zum Head-Element hinzufügen';
 $lang['setPrevNextLinks'][1]                  = 'Wählen Sie diese Option, um dem &lt;head&gt;-Element die entsprechenden Relationslinks hinzuzufügen.';
-$lang['templateTextPagination'][0]            = 'Individuelles Textuelle Paginierun Template';
-$lang['templateTextPagination'][1]            = 'Hier können Sie das Standard-Template überschreiben.';
-
+$lang['templatePagination'][0]                = 'Individuelles Paginierung Template';
+$lang['templatePagination'][1]                = 'Hier können Sie das Standard-Template überschreiben.';
 
 /**
  * Legends

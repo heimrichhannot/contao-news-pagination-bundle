@@ -4,6 +4,7 @@ namespace HeimrichHannot\NewsPaginationBundle\EventListener;
 
 
 use Contao\Config;
+use Contao\Controller;
 use Contao\CoreBundle\Framework\ContaoFrameworkInterface;
 use Contao\Environment;
 use Contao\FrontendTemplate;
@@ -311,26 +312,10 @@ class HookListener extends \Controller
     protected function addPagination(Template $template, array $teaserData, Module $module, int $pageCount, string $pageParam, string $singlePageUrl)
     {
         $paginationTemplate = null;
-
-        if ($module->textPaginationAddReadOnSinglePage) {
-            $paginationTemplate                  = new FrontendTemplate('singlepage_pagination');
+        if ('' !== $module->templatePagination) {
+            $paginationTemplate                  = new FrontendTemplate($module->templatePagination);
             $paginationTemplate->singlePageUrl   = $singlePageUrl;
             $paginationTemplate->singlePageLabel = $GLOBALS['TL_LANG']['MSC']['readOnSinglePage'];
-            $paginationTemplate->justSinglePage  = true;
-        }
-
-        // normal pagination
-        $pagination = new Pagination($pageCount, 1, Config::get('maxPaginationLinks'), $pageParam, $paginationTemplate);
-
-        $template->singlePagePagination = $pagination->generate("\n  ");
-
-        $paginationTemplate = null;
-
-        if ($module->textPaginationAddReadOnSinglePage) {
-            $paginationTemplate                  = new FrontendTemplate('singlepage_pagination');
-            $paginationTemplate->singlePageUrl   = $singlePageUrl;
-            $paginationTemplate->singlePageLabel = $GLOBALS['TL_LANG']['MSC']['readOnSinglePage'];
-            $paginationTemplate->justSinglePage  = false;
         }
 
         // normal pagination
