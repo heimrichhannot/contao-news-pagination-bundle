@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.1.5] - 2018-07-06
+
+### Fixed
+- fixed options_callback
+
 ## [2.1.4] - 2018-06-28
 
 ### Changed

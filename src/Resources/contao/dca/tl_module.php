@@ -52,7 +52,7 @@ $arrFields = [
         'exclude'          => true,
         'filter'           => true,
         'inputType'        => 'select',
-        'options_callback' => ['HeimrichHannot\NewsPagination\Backend\Backend', 'getPaginationTemplate'],
+        'options_callback' => ['HeimrichHannot\NewsPagination\Backend\Backend', 'getTextualPaginationTemplate'],
         'reference'        => &$GLOBALS['TL_LANG']['tl_module']['reference']['newsPaginationBundle'],
         'eval'             => ['tl_class' => 'w50', 'includeBlankOption' => true, 'submitOnChange' => true],
         'sql'              => "varchar(64) NOT NULL default ''",
