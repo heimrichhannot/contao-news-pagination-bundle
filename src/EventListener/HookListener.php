@@ -84,7 +84,10 @@ class HookListener extends \Controller
     {
         $template->module = $module;
 
-        $this->linkCanonical->setContent($this->urlUtil->getCurrentUrl([]));
+        if (!$this->linkCanonical->hasContent()) {
+            $this->linkCanonical->setContent($this->urlUtil->getCurrentUrl([]));
+        }
+
         $this->linkPrev->setContent('');
         $this->linkNext->setContent('');
 

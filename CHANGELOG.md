@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.1.6] - 2018-07-26
+
+### Fixed
+- set linkCanoical if no canonical link isset
+
 ## [2.1.5] - 2018-07-06
 
 ### Fixed
