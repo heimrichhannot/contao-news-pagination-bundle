@@ -14,8 +14,8 @@ use Contao\System;
 class Backend
 {
 
-    public function getTextualPaginationTemplate()
+    public function getPaginationTemplate()
     {
-        return System::getContainer()->get('contao.framework')->getAdapter(Controller::class)->getTemplateGroup('textual_pagination');
+        return System::getContainer()->get('contao.framework')->getAdapter(Controller::class)->getTemplateGroup('pagination');
     }
 }
