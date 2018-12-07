@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.1.8] - 2018-07-26
+
+### Fixed
+- do not set `prev` or `next` header links if empty (rollback from 2.1.3)
+- add Manager Plugin order to load after `heimrichhannot/contao-header-bundle` 
+
 ## [2.1.7] - 2018-07-26
 
 ### Fixed

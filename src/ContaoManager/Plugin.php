@@ -6,6 +6,7 @@ use Contao\ManagerPlugin\Bundle\Config\BundleConfig;
 use Contao\ManagerPlugin\Bundle\BundlePluginInterface;
 use Contao\ManagerPlugin\Bundle\Parser\ParserInterface;
 use Contao\NewsBundle\ContaoNewsBundle;
+use HeimrichHannot\HeadBundle\HeimrichHannotContaoHeadBundle;
 use HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle;
 
 class Plugin implements BundlePluginInterface
@@ -15,7 +16,7 @@ class Plugin implements BundlePluginInterface
      */
     public function getBundles(ParserInterface $parser)
     {
-        $bundles = [ContaoNewsBundle::class];
+        $bundles = [ContaoNewsBundle::class, HeimrichHannotContaoHeadBundle::class];
 
         if (class_exists('HeimrichHannot\NewsBundle\HeimrichHannotContaoNewsBundle'))
         {
