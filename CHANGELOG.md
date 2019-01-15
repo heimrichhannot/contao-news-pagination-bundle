@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.1.9] - 2018-07-26
+
+### Fixed
+- symfony 4 support, make service public, thanks to @Paddy0174 (https://github.com/heimrichhannot/contao-news-pagination-bundle/pull/1)
+
 ## [2.1.8] - 2018-07-26
 
 ### Fixed
