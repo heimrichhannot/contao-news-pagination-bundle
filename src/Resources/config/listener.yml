@@ -1,6 +1,7 @@
 services:
     huh.news_pagination.listener.hooks:
         class: HeimrichHannot\NewsPaginationBundle\EventListener\HookListener
+        public: true
         arguments:
             - "@contao.framework"
             - "@huh.head.tag.link_canonical"
