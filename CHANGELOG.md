@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.1.10] - 2020-04-01
+- removed usages of heimrichhannot/contao-request in favor of heimrichhannot/contao-request-bundle
+
 ## [2.1.9] - 2018-07-26
 
 ### Fixed

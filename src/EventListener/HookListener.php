@@ -4,7 +4,6 @@ namespace HeimrichHannot\NewsPaginationBundle\EventListener;
 
 
 use Contao\Config;
-use Contao\Controller;
 use Contao\CoreBundle\Framework\ContaoFrameworkInterface;
 use Contao\Environment;
 use Contao\FrontendTemplate;
@@ -15,7 +14,7 @@ use HeimrichHannot\HeadBundle\Tag\Link\LinkCanonical;
 use HeimrichHannot\HeadBundle\Tag\Link\LinkNext;
 use HeimrichHannot\HeadBundle\Tag\Link\LinkPrev;
 use HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle;
-use HeimrichHannot\Request\Request;
+use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
 use HeimrichHannot\UtilsBundle\Pagination\TextualPagination;
 use HeimrichHannot\UtilsBundle\String\StringUtil;
 use HeimrichHannot\UtilsBundle\Url\UrlUtil;
@@ -59,7 +58,8 @@ class HookListener extends \Controller
         LinkPrev $linkPrev,
         LinkNext $linkNext,
         UrlUtil $urlUtil,
-        StringUtil $stringUtil
+        StringUtil $stringUtil,
+        Request $request
     ) {
         $this->framework     = $framework;
         $this->linkCanonical = $linkCanonical;
@@ -89,8 +89,8 @@ class HookListener extends \Controller
         }
 
         // no pagination if full version parameter is set
-        if ($module->fullVersionGetParameter && Request::getGet($module->fullVersionGetParameter)
-            || $module->acceptPrintGetParameter && Request::getGet('print')) {
+        if ($module->fullVersionGetParameter && $this->request->getGet($module->fullVersionGetParameter)
+            || $module->acceptPrintGetParameter && $this->request->getGet('print')) {
             return;
         }
 
@@ -114,7 +114,7 @@ class HookListener extends \Controller
     public function doAddManualNewsPagination(Template $template, array $article, Module $module)
     {
         $pageParam  = 'page_n' . $module->id;
-        $page       = Request::getGet($pageParam) ?: 1;
+        $page       = $this->request->getGet($pageParam) ?: 1;
         $pageCount  = 0;
         $teaserData = [];
 
@@ -162,7 +162,7 @@ class HookListener extends \Controller
     public function doAddNewsPagination(Template $template, array $article, Module $module)
     {
         $pageParam   = 'page_n' . $module->id;
-        $currentPage = is_numeric(Request::getGet($pageParam)) && Request::getGet($pageParam) > 0 ? Request::getGet($pageParam) : 1;
+        $currentPage = is_numeric($this->request->getGet($pageParam)) && $this->request->getGet($pageParam) > 0 ? $this->request->getGet($pageParam) : 1;
 
         $maxAmount = $module->paginationMaxCharCount;
         $pageCount = 1;
