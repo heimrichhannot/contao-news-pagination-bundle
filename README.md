@@ -7,6 +7,8 @@ This bundle offers automatic content pagination for the news reader.
 - add a pagination for navigating between the news parts
 - automatic splitting
     - split news articles by an adjustable character amount respecting html tags
+- manual splitting
+    - split news content by wrapping the content elements in special start and stop content elements
 
 ### Technical instructions
 

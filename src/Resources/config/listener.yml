@@ -9,3 +9,4 @@ services:
             - "@huh.head.tag.link_next"
             - "@huh.utils.url"
             - "@huh.utils.string"
+            - "@huh.request"
