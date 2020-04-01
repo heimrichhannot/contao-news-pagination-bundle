@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.1.12] - 2020-04-01
+- fixed constructor
+
 ## [2.1.11] - 2020-04-01
 - fixed service definition
 

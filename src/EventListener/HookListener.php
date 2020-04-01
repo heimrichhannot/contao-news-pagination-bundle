@@ -51,6 +51,10 @@ class HookListener extends \Controller
      * @var StringUtil
      */
     private $stringUtil;
+    /**
+     * @var Request
+     */
+    private $request;
 
     public function __construct(
         ContaoFrameworkInterface $framework,
@@ -67,6 +71,7 @@ class HookListener extends \Controller
         $this->linkNext      = $linkNext;
         $this->urlUtil       = $urlUtil;
         $this->stringUtil    = $stringUtil;
+        $this->request       = $request;
     }
 
     static $manualPaginationFound = false;
