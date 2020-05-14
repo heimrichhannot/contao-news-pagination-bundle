@@ -1,27 +1,27 @@
 <?php
 
-$arrDca = &$GLOBALS['TL_DCA']['tl_module'];
+$dca = &$GLOBALS['TL_DCA']['tl_module'];
 
 /**
  * Palettes
  */
-$arrDca['palettes']['newsreader'] = str_replace('{template_legend', '{pagination_legend},paginationMode;{template_legend', $arrDca['palettes']['newsreader']);
+$dca['palettes']['newsreader'] = str_replace('{template_legend', '{pagination_legend},paginationMode;{template_legend', $dca['palettes']['newsreader']);
 
 /**
  * Subpalettes
  */
-$arrDca['palettes']['__selector__'][] = 'paginationMode';
-$arrDca['palettes']['__selector__'][] = 'addTextualPagination';
+$dca['palettes']['__selector__'][] = 'paginationMode';
+$dca['palettes']['__selector__'][] = 'addTextualPagination';
 
-$arrDca['subpalettes']['paginationMode_' . \HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle::MODE_AUTO]                      = 'addTextualPagination,paginationMaxCharCount,avoidTrailingHeadlines,paginationCeTextCssSelector,fullVersionGetParameter,acceptPrintGetParameter,addFullVersionCanonicalLink,addPrevNextLinks,templatePagination';
-$arrDca['subpalettes']['paginationMode_' . \HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle::MODE_MANUAL]                    = 'addTextualPagination,fullVersionGetParameter,acceptPrintGetParameter,addFullVersionCanonicalLink,addPrevNextLinks,templatePagination';
-$arrDca['subpalettes']['paginationMode_' . \HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle::MODE_MANUAL_WITH_AUTO_FALLBACK] = 'addTextualPagination,paginationMaxCharCount,avoidTrailingHeadlines,paginationCeTextCssSelector,fullVersionGetParameter,acceptPrintGetParameter,addFullVersionCanonicalLink,addPrevNextLinks,templatePagination';
-$arrDca['subpalettes']['addTextualPagination']                                                                                        = 'textPaginationDelimiter,textPaginationMaxCharCount';
+$dca['subpalettes']['paginationMode_' . \HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle::MODE_AUTO]                      = 'addTextualPagination,paginationMaxCharCount,avoidTrailingHeadlines,paginationCeTextCssSelector,fullVersionGetParameter,acceptPrintGetParameter,addFullVersionCanonicalLink,addPrevNextLinks,templatePagination';
+$dca['subpalettes']['paginationMode_' . \HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle::MODE_MANUAL]                    = 'addTextualPagination,fullVersionGetParameter,acceptPrintGetParameter,addFullVersionCanonicalLink,addPrevNextLinks,templatePagination';
+$dca['subpalettes']['paginationMode_' . \HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle::MODE_MANUAL_WITH_AUTO_FALLBACK] = 'addTextualPagination,paginationMaxCharCount,avoidTrailingHeadlines,paginationCeTextCssSelector,fullVersionGetParameter,acceptPrintGetParameter,addFullVersionCanonicalLink,addPrevNextLinks,templatePagination';
+$dca['subpalettes']['addTextualPagination']                                                                                        = 'textPaginationDelimiter,textPaginationMaxCharCount';
 
 /**
  * Fields
  */
-$arrFields = [
+$fields = [
     'paginationMode'              => [
         'label'     => &$GLOBALS['TL_LANG']['tl_module']['paginationMode'],
         'exclude'   => true,
@@ -117,4 +117,4 @@ $arrFields = [
     ],
 ];
 
-$arrDca['fields'] += $arrFields;
+$dca['fields'] = array_merge(is_array($dca['fields']) ? $dca['fields'] : [], $fields);
