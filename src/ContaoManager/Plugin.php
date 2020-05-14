@@ -21,7 +21,7 @@ class Plugin implements BundlePluginInterface
         $bundles = [ContaoNewsBundle::class, HeimrichHannotContaoHeadBundle::class];
 
         if (class_exists('HeimrichHannot\ReaderBundle\HeimrichHannotContaoReaderBundle')) {
-            $loadAfter[] = \HeimrichHannot\ReaderBundle\HeimrichHannotContaoReaderBundle::class;
+            $bundles[] = \HeimrichHannot\ReaderBundle\HeimrichHannotContaoReaderBundle::class;
         }
 
         if (class_exists('HeimrichHannot\NewsBundle\HeimrichHannotContaoNewsBundle'))
