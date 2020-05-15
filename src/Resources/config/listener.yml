@@ -1,12 +1,10 @@
 services:
-    huh.news_pagination.listener.hooks:
-        class: HeimrichHannot\NewsPaginationBundle\EventListener\HookListener
-        public: true
-        arguments:
-            - "@contao.framework"
-            - "@huh.head.tag.link_canonical"
-            - "@huh.head.tag.link_prev"
-            - "@huh.head.tag.link_next"
-            - "@huh.utils.url"
-            - "@huh.utils.string"
-            - "@huh.request"
+  _defaults:
+    autowire: true
+    public: true
+
+  HeimrichHannot\NewsPaginationBundle\EventListener\HookListener: ~
+
+  HeimrichHannot\NewsPaginationBundle\EventListener\ReaderBeforeRenderEventListener:
+    tags:
+      - { name: kernel.event_listener, event: huh.reader.event.reader_before_render, method: addNewsPagination }

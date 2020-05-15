@@ -1,18 +1,28 @@
 <?php
 
-namespace HeimrichHannot\NewsPagination\Backend;
-
+namespace HeimrichHannot\NewsPaginationBundle\DataContainer;
 
 use Contao\ContentModel;
 use Contao\Database;
 use Contao\DataContainer;
 use HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle;
+use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 
-class Content extends \Backend
+class ContentContainer
 {
-    public static function addNewsPaginationStopElement(DataContainer $dc)
+    /**
+     * @var ModelUtil
+     */
+    private $modelUtil;
+
+    public function __construct(ModelUtil $modelUtil) {
+
+        $this->modelUtil = $modelUtil;
+    }
+
+    public function addNewsPaginationStopElement(DataContainer $dc)
     {
-        if (($element = ContentModel::findByPk($dc->id)) === null
+        if (($element = $this->modelUtil->findModelInstanceByPk('tl_content', $dc->id)) === null
             || $element->type !== NewsPaginationBundle::CONTENT_ELEMENT_NEWS_PAGINATION_START
             || $element->newsPaginationStopCreated
         )
@@ -23,7 +33,7 @@ class Content extends \Backend
         $element->newsPaginationStopCreated = true;
         $element->save();
 
-        $elements = ContentModel::findBy(
+        $elements = $this->modelUtil->findModelInstancesBy('tl_content',
             ['tl_content.ptable=?', 'tl_content.pid=?'],
             [
                 $element->ptable,

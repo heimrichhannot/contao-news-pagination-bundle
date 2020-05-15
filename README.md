@@ -1,6 +1,6 @@
 # News Pagination
 
-This bundle offers automatic content pagination for the news reader.
+This bundle offers automatic content pagination for the core news reader module and the [heimrichhannot/contao-reader-bundle](https://github.com/heimrichhannot/contao-reader-bundle).
 
 ## Features
 

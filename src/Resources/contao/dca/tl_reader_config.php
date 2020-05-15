@@ -8,12 +8,15 @@ if (class_exists('HeimrichHannot\ReaderBundle\HeimrichHannotContaoReaderBundle')
     $dcaModule = $GLOBALS['TL_DCA']['tl_module'];
 
     /**
+     * Config
+     */
+    $dca['config']['onload_callback']['newsPagination'] = [\HeimrichHannot\NewsPaginationBundle\DataContainer\ReaderConfigContainer::class, 'modifyDca'];
+
+    /**
      * Palettes
      */
     $dca['palettes']['__selector__'][] = 'paginationMode';
     $dca['palettes']['__selector__'][] = 'addTextualPagination';
-
-    $dca['palettes']['default'] = str_replace('{template_legend', '{pagination_legend},paginationMode;{template_legend', $dca['palettes']['default']);
 
     /**
      * Subpalettes

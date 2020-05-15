@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.2.0] - 2020-05-15
+- class refactoring
+- added optional support for reader-bundle
+
 ## [2.1.12] - 2020-04-01
 - fixed constructor
 

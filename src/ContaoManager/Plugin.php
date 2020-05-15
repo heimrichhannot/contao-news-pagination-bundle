@@ -11,7 +11,7 @@ use HeimrichHannot\HeadBundle\HeimrichHannotContaoHeadBundle;
 use HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle;
 use Symfony\Component\Config\Loader\LoaderInterface;
 
-class Plugin implements BundlePluginInterface
+class Plugin implements BundlePluginInterface, ConfigPluginInterface
 {
     /**
      * {@inheritdoc}
@@ -33,6 +33,13 @@ class Plugin implements BundlePluginInterface
             BundleConfig::create(NewsPaginationBundle::class)
                 ->setLoadAfter($bundles)
         ];
+    }
+
+    public function registerContainerConfiguration(LoaderInterface $loader, array $managerConfig)
+    {
+        $loader->load('@NewsPaginationBundle/Resources/config/services.yml');
+        $loader->load('@NewsPaginationBundle/Resources/config/listener.yml');
+        $loader->load('@NewsPaginationBundle/Resources/config/datacontainers.yml');
     }
 }
 

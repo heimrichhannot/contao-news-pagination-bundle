@@ -3,7 +3,7 @@
 /**
  * Hooks
  */
-$GLOBALS['TL_HOOKS']['parseArticles']['addNewsPagination'] = ['huh.news_pagination.listener.hooks', 'addNewsPagination'];
+$GLOBALS['TL_HOOKS']['parseArticles']['addNewsPagination'] = [\HeimrichHannot\NewsPaginationBundle\EventListener\HookListener::class, 'addNewsPagination'];
 
 /**
  * Content elements
