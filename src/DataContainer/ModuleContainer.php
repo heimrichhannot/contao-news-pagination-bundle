@@ -1,7 +1,12 @@
 <?php
 
-namespace HeimrichHannot\NewsPaginationBundle\DataContainer;
+/*
+ * Copyright (c) 2020 Heimrich & Hannot GmbH
+ *
+ * @license LGPL-3.0-or-later
+ */
 
+namespace HeimrichHannot\NewsPaginationBundle\DataContainer;
 
 use Contao\Controller;
 use Contao\CoreBundle\Framework\ContaoFramework;

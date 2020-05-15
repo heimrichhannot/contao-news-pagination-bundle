@@ -1,7 +1,12 @@
 <?php
 
-namespace HeimrichHannot\NewsPaginationBundle\EventListener;
+/*
+ * Copyright (c) 2020 Heimrich & Hannot GmbH
+ *
+ * @license LGPL-3.0-or-later
+ */
 
+namespace HeimrichHannot\NewsPaginationBundle\EventListener;
 
 use HeimrichHannot\NewsPaginationBundle\Manager\NewsPaginationManager;
 use HeimrichHannot\ReaderBundle\Event\ReaderBeforeRenderEvent;
@@ -18,7 +23,8 @@ class ReaderBeforeRenderEventListener
         $this->manager = $manager;
     }
 
-    public function addNewsPagination(ReaderBeforeRenderEvent $event) {
+    public function addNewsPagination(ReaderBeforeRenderEvent $event)
+    {
         $context = (object) $event->getTemplateData();
         $this->manager->addNewsPagination($context, $event->getItem()->getFormatted(), $event->getReaderConfig());
 

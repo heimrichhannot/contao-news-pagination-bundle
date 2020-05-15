@@ -1,13 +1,16 @@
 <?php
 
+/*
+ * Copyright (c) 2020 Heimrich & Hannot GmbH
+ *
+ * @license LGPL-3.0-or-later
+ */
+
 namespace HeimrichHannot\NewsPaginationBundle\Manager;
 
-
 use Contao\Config;
-use Contao\CoreBundle\Framework\ContaoFrameworkInterface;
 use Contao\Environment;
 use Contao\FrontendTemplate;
-use Contao\Module;
 use Contao\Pagination;
 use Contao\Template;
 use HeimrichHannot\HeadBundle\Tag\Link\LinkCanonical;
@@ -22,6 +25,16 @@ use Wa72\HtmlPageDom\HtmlPageCrawler;
 
 class NewsPaginationManager
 {
+    public static $manualPaginationFound = false;
+
+    public static $tags = [
+        'p',
+        'span',
+        'strong',
+        'i',
+        'em',
+        'div',
+    ];
     /**
      * @var LinkCanonical
      */
@@ -60,27 +73,15 @@ class NewsPaginationManager
         Request $request
     ) {
         $this->linkCanonical = $linkCanonical;
-        $this->linkPrev      = $linkPrev;
-        $this->linkNext      = $linkNext;
-        $this->urlUtil       = $urlUtil;
-        $this->stringUtil    = $stringUtil;
-        $this->request       = $request;
+        $this->linkPrev = $linkPrev;
+        $this->linkNext = $linkNext;
+        $this->urlUtil = $urlUtil;
+        $this->stringUtil = $stringUtil;
+        $this->request = $request;
     }
-
-    static $manualPaginationFound = false;
-
-    static $tags = [
-        'p',
-        'span',
-        'strong',
-        'i',
-        'em',
-        'div',
-    ];
 
     /**
      * @param $output mixed Can be instance of Template or Item
-     * @param array $news
      * @param $config
      */
     public function addNewsPagination($output, array $news, $config)
@@ -100,29 +101,34 @@ class NewsPaginationManager
         switch ($config->paginationMode) {
             case NewsPaginationBundle::MODE_AUTO:
                 $this->doAddNewsPagination($output, $news, $config);
+
                 break;
+
             case NewsPaginationBundle::MODE_MANUAL:
                 $this->doAddManualNewsPagination($output, $news, $config);
+
                 break;
+
             case NewsPaginationBundle::MODE_MANUAL_WITH_AUTO_FALLBACK:
                 $this->doAddManualNewsPagination($output, $news, $config);
 
                 if (!static::$manualPaginationFound) {
                     $this->doAddNewsPagination($output, $news, $config);
                 }
+
                 break;
         }
     }
 
     public function doAddManualNewsPagination($output, array $news, $config)
     {
-        $pageParam  = 'page_n' . $config->id;
-        $page       = $this->request->getGet($pageParam) ?: 1;
-        $pageCount  = 0;
+        $pageParam = 'page_n'.$config->id;
+        $page = $this->request->getGet($pageParam) ?: 1;
+        $pageCount = 0;
         $teaserData = [];
 
         // add wrapper div since remove() called on root elements doesn't work (bug?)
-        $node          = new HtmlPageCrawler('<div><div class="news-pagination-content">' . \Contao\StringUtil::restoreBasicEntities($output->text) . '</div></div>');
+        $node = new HtmlPageCrawler('<div><div class="news-pagination-content">'.\Contao\StringUtil::restoreBasicEntities($output->text).'</div></div>');
         $startElements = $node->filter('.news-pagination-content > [class*="ce_news_pagination_start"]');
 
         if ($startElements->count() < 1) {
@@ -153,10 +159,10 @@ class NewsPaginationManager
 
         // path without query string
         $path = \Symfony\Component\HttpFoundation\Request::createFromGlobals()->getPathInfo();
-        $url  = Environment::get('url') . $path;
+        $url = Environment::get('url').$path;
 
         // add pagination
-        $singlePageUrl = $this->urlUtil->addQueryString($config->fullVersionGetParameter . '=1', $url);
+        $singlePageUrl = $this->urlUtil->addQueryString($config->fullVersionGetParameter.'=1', $url);
         $this->addPagination($output, $teaserData, $config, $pageCount, $pageParam, $singlePageUrl);
 
         $this->handleMetaTags($pageCount, $page, $pageParam, $config, $news['alias'], $url);
@@ -164,35 +170,35 @@ class NewsPaginationManager
 
     public function doAddNewsPagination($output, array $news, $config)
     {
-        $pageParam   = 'page_n' . $config->id;
+        $pageParam = 'page_n'.$config->id;
         $currentPage = is_numeric($this->request->getGet($pageParam)) && $this->request->getGet($pageParam) > 0 ? $this->request->getGet($pageParam) : 1;
 
         $maxAmount = $config->paginationMaxCharCount;
         $pageCount = 1;
 
         // add wrapper div since remove() called on root elements doesn't work (bug?)
-        $node              = new HtmlPageCrawler('<div><div class="news-pagination-content">' . \Contao\StringUtil::restoreBasicEntities($output->text) . '</div></div>');
-        $textAmount        = 0;
+        $node = new HtmlPageCrawler('<div><div class="news-pagination-content">'.\Contao\StringUtil::restoreBasicEntities($output->text).'</div></div>');
+        $textAmount = 0;
         $ceTextCssSelector = $config->paginationCeTextCssSelector;
-        $tags              = static::$tags;
+        $tags = static::$tags;
 
         // replace multiple br elements to
         $node->filter('.news-pagination-content > [class*="ce_"]')->each(function ($element) use (&$textAmount, $maxAmount, $tags, $node, $ceTextCssSelector) {
-            if (strpos($element->getAttribute('class'), 'ce_text') !== false && strpos($element->html(), 'figure') === false) {
-                $element->children($ceTextCssSelector . ', figure')->each(function ($paragraph) use (&$textAmount, $maxAmount, $tags) {
+            if (false !== strpos($element->getAttribute('class'), 'ce_text') && false === strpos($element->html(), 'figure')) {
+                $element->children($ceTextCssSelector.', figure')->each(function ($paragraph) use (&$textAmount, $maxAmount, $tags) {
                     $paragraph->html(preg_replace('@<br\s?\/?><br\s?\/?>@i', '</p><p>', $paragraph->html()));
                 });
             }
         });
 
         // pagination
-        $node     = new HtmlPageCrawler($node->saveHTML());
+        $node = new HtmlPageCrawler($node->saveHTML());
         $elements = [];
 
         // get relevant elements
         $node->filter('.news-pagination-content > [class*="ce_"]')->each(function ($element) use (&$textAmount, $maxAmount, $tags, $node, $ceTextCssSelector, &$pageCount, &$elements) {
-            if (strpos($element->getAttribute('class'), 'ce_text') !== false
-                && strpos($element->html(), 'figure') === false) {
+            if (false !== strpos($element->getAttribute('class'), 'ce_text')
+                && false === strpos($element->html(), 'figure')) {
                 if ($ceTextCssSelector) {
                     $element = $element->filter($ceTextCssSelector);
                 }
@@ -200,17 +206,17 @@ class NewsPaginationManager
                 $element->children()->each(function ($element) use (&$intTextAmount, $textAmount, $tags, &$pageCount, &$elements) {
                     $elements[] = [
                         'element' => $element,
-                        'text'    => trim($element->text()),
-                        'tag'     => $element->nodeName(),
-                        'length'  => strlen($element->text()),
+                        'text' => trim($element->text()),
+                        'tag' => $element->nodeName(),
+                        'length' => \strlen($element->text()),
                     ];
                 });
             } else {
                 $elements[] = [
                     'element' => $element,
-                    'text'    => trim($element->text()),
-                    'tag'     => $element->nodeName(),
-                    'length'  => 0,
+                    'text' => trim($element->text()),
+                    'tag' => $element->nodeName(),
+                    'length' => 0,
                 ];
             }
         });
@@ -220,10 +226,10 @@ class NewsPaginationManager
 
         foreach ($elements as $element) {
             $textAmountOrigin = $textAmount;
-            $textAmount       += $element['length'];
+            $textAmount += $element['length'];
 
-            if ($textAmount > $maxAmount && $textAmountOrigin != 0) {
-                $pageCount++;
+            if ($textAmount > $maxAmount && 0 != $textAmountOrigin) {
+                ++$pageCount;
                 $textAmount = $element['length'];
             }
 
@@ -239,17 +245,17 @@ class NewsPaginationManager
             $result = [];
 
             foreach ($splitted as $page => $parts) {
-                $headlines         = [];
-                $nonHeadlines      = [];
+                $headlines = [];
+                $nonHeadlines = [];
                 $trailingHeadlines = true;
 
-                for ($i = count($parts) - 1; $i > -1; $i--) {
-                    if ($trailingHeadlines && in_array($parts[$i]['tag'], ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8', 'h9', 'h10'])) {
+                for ($i = \count($parts) - 1; $i > -1; --$i) {
+                    if ($trailingHeadlines && \in_array($parts[$i]['tag'], ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8', 'h9', 'h10'])) {
                         $headlines[] = $parts[$i];
                     } else {
                         // break overlap handling if headline is not trailing
                         $trailingHeadlines = false;
-                        $nonHeadlines[]    = $parts[$i];
+                        $nonHeadlines[] = $parts[$i];
                     }
                 }
 
@@ -283,7 +289,7 @@ class NewsPaginationManager
                         $part['element']->remove();
                     }
                 } else {
-                    if ($page != 1) {
+                    if (1 != $page) {
                         $part['element']->remove();
                     }
                 }
@@ -292,12 +298,12 @@ class NewsPaginationManager
 
         $output->text = str_replace(['%7B', '%7D'], ['{', '}'], $node->saveHTML());
 
-        /** @var $objPage \Contao\PageModel */
+        /* @var $objPage \Contao\PageModel */
         global $objPage;
 
         // path without query string
         $path = \Symfony\Component\HttpFoundation\Request::createFromGlobals()->getPathInfo();
-        $url  = Environment::get('url') . $path;
+        $url = Environment::get('url').$path;
 
         // if path is id, take absolute url from current page
         if (is_numeric(ltrim($path, '/'))) {
@@ -305,19 +311,51 @@ class NewsPaginationManager
         }
 
         // add pagination
-        $singlePageUrl = $this->urlUtil->addQueryString($config->fullVersionGetParameter . '=1', $url);
+        $singlePageUrl = $this->urlUtil->addQueryString($config->fullVersionGetParameter.'=1', $url);
         $this->addPagination($output, $result, $config, $pageCount, $pageParam, $singlePageUrl);
 
         // add head info
         $this->handleMetaTags($pageCount, $currentPage, $pageParam, $config, $news['alias'], $url);
     }
 
+    public function handleMetaTags(int $pageCount, int $currentPage, string $pageParam, $config, string $alias, string $url)
+    {
+        if ($pageCount > 1) {
+            $canonical = $this->linkCanonical->getContent();
+
+            // canonical link must contain the current news url or not set
+            if ($config->addFullVersionCanonicalLink && $config->fullVersionGetParameter && (!$canonical || false !== strpos($canonical, urlencode($alias)))) {
+                $this->linkCanonical->setContent($this->urlUtil->addQueryString($config->fullVersionGetParameter.'=1', $url));
+            }
+
+            // prev and next links
+            if ($config->addPrevNextLinks) {
+                if (1 == $currentPage) {
+                    $this->linkPrev->setContent('');
+
+                    $this->linkNext->setContent($this->urlUtil->addQueryString($pageParam.'=2', $url));
+                } elseif ($currentPage > 1 && $currentPage < $pageCount) {
+                    $this->linkPrev->setContent($this->urlUtil->addQueryString($pageParam.'='.($currentPage - 1), $url));
+
+                    $this->linkNext->setContent($this->urlUtil->addQueryString($pageParam.'='.($currentPage + 1), $url));
+                } else {
+                    if ($currentPage >= $pageCount) {
+                        $this->linkPrev->setContent($this->urlUtil->addQueryString($pageParam.'='.($pageCount - 1), $url));
+
+                        $this->linkNext->setContent('');
+                    }
+                }
+            }
+        }
+    }
+
     protected function addPagination($output, array $teaserData, $config, int $pageCount, string $pageParam, string $singlePageUrl)
     {
         $paginationTemplate = null;
+
         if ('' !== $config->templatePagination) {
-            $paginationTemplate                  = new FrontendTemplate($config->templatePagination);
-            $paginationTemplate->singlePageUrl   = $singlePageUrl;
+            $paginationTemplate = new FrontendTemplate($config->templatePagination);
+            $paginationTemplate->singlePageUrl = $singlePageUrl;
             $paginationTemplate->singlePageLabel = $GLOBALS['TL_LANG']['MSC']['readOnSinglePage'];
         }
 
@@ -343,72 +381,41 @@ class NewsPaginationManager
         $teasers = [];
 
         foreach ($splitted as $page => $data) {
-            $teaserParts      = [];
-            $textLength       = 0;
+            $teaserParts = [];
+            $textLength = 0;
             $maxCountExceeded = false;
 
             foreach ($data as $i => $element) {
-                $elementLength = strlen($element['text']);
+                $elementLength = \strlen($element['text']);
 
                 if ($elementLength > $config->textPaginationMaxCharCount) {
                     $truncated = $this->stringUtil->truncateHtml($element['text'], $config->textPaginationMaxCharCount, '');
 
-                    if (strlen($truncated) + $textLength > $config->textPaginationMaxCharCount) {
+                    if (\strlen($truncated) + $textLength > $config->textPaginationMaxCharCount) {
                         $maxCountExceeded = true;
+
                         continue;
                     }
 
-                    if ($i === count($data) - 1) {
+                    if ($i === \count($data) - 1) {
                         $maxCountExceeded = true;
                     }
 
                     $teaserParts[] = $truncated;
-                    $textLength    += strlen($truncated);
+                    $textLength += \strlen($truncated);
                 } else {
                     if ($elementLength + $textLength > $config->textPaginationMaxCharCount) {
                         continue;
                     }
 
                     $teaserParts[] = $element['text'];
-                    $textLength    += $elementLength;
+                    $textLength += $elementLength;
                 }
             }
 
-            $teasers[$page] = implode(' ', $teaserParts) . ($maxCountExceeded ? $config->textPaginationDelimiter : '');
+            $teasers[$page] = implode(' ', $teaserParts).($maxCountExceeded ? $config->textPaginationDelimiter : '');
         }
 
         return $teasers;
     }
-
-    public function handleMetaTags(int $pageCount, int $currentPage, string $pageParam, $config, string $alias, string $url)
-    {
-        if ($pageCount > 1) {
-            $canonical = $this->linkCanonical->getContent();
-
-            // canonical link must contain the current news url or not set
-            if ($config->addFullVersionCanonicalLink && $config->fullVersionGetParameter && (!$canonical || strpos($canonical, urlencode($alias)) !== false)) {
-                $this->linkCanonical->setContent($this->urlUtil->addQueryString($config->fullVersionGetParameter . '=1', $url));
-            }
-
-            // prev and next links
-            if ($config->addPrevNextLinks) {
-                if ($currentPage == 1) {
-                    $this->linkPrev->setContent('');
-
-                    $this->linkNext->setContent($this->urlUtil->addQueryString($pageParam . '=2', $url));
-                } elseif ($currentPage > 1 && $currentPage < $pageCount) {
-                    $this->linkPrev->setContent($this->urlUtil->addQueryString($pageParam . '=' . ($currentPage - 1), $url));
-
-                    $this->linkNext->setContent($this->urlUtil->addQueryString($pageParam . '=' . ($currentPage + 1), $url));
-                } else {
-                    if ($currentPage >= $pageCount) {
-                        $this->linkPrev->setContent($this->urlUtil->addQueryString($pageParam . '=' . ($pageCount - 1), $url));
-
-                        $this->linkNext->setContent('');
-                    }
-                }
-            }
-        }
-    }
 }
-

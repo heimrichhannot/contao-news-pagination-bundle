@@ -1,7 +1,12 @@
 <?php
 
-namespace HeimrichHannot\NewsPaginationBundle\Element;
+/*
+ * Copyright (c) 2020 Heimrich & Hannot GmbH
+ *
+ * @license LGPL-3.0-or-later
+ */
 
+namespace HeimrichHannot\NewsPaginationBundle\Element;
 
 use Contao\ContentElement;
 
@@ -38,7 +43,7 @@ class NewsPaginationStart extends ContentElement
             }
         }
 
-        $index                 = array_search($this->id, $elements);
+        $index = array_search($this->id, $elements);
         $this->Template->index = $index > -1 ? $index + 1 : 0;
     }
 }

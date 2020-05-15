@@ -1,9 +1,15 @@
 <?php
 
+/*
+ * Copyright (c) 2020 Heimrich & Hannot GmbH
+ *
+ * @license LGPL-3.0-or-later
+ */
+
 namespace HeimrichHannot\NewsPaginationBundle\ContaoManager;
 
-use Contao\ManagerPlugin\Bundle\Config\BundleConfig;
 use Contao\ManagerPlugin\Bundle\BundlePluginInterface;
+use Contao\ManagerPlugin\Bundle\Config\BundleConfig;
 use Contao\ManagerPlugin\Bundle\Parser\ParserInterface;
 use Contao\ManagerPlugin\Config\ConfigPluginInterface;
 use Contao\NewsBundle\ContaoNewsBundle;
@@ -24,14 +30,13 @@ class Plugin implements BundlePluginInterface, ConfigPluginInterface
             $bundles[] = \HeimrichHannot\ReaderBundle\HeimrichHannotContaoReaderBundle::class;
         }
 
-        if (class_exists('HeimrichHannot\NewsBundle\HeimrichHannotContaoNewsBundle'))
-        {
+        if (class_exists('HeimrichHannot\NewsBundle\HeimrichHannotContaoNewsBundle')) {
             $bundles[] = \HeimrichHannot\NewsBundle\HeimrichHannotContaoNewsBundle::class;
         }
 
         return [
             BundleConfig::create(NewsPaginationBundle::class)
-                ->setLoadAfter($bundles)
+                ->setLoadAfter($bundles),
         ];
     }
 
@@ -42,4 +47,3 @@ class Plugin implements BundlePluginInterface, ConfigPluginInterface
         $loader->load('@NewsPaginationBundle/Resources/config/datacontainers.yml');
     }
 }
-
