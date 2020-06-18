@@ -12,7 +12,6 @@ use Contao\Config;
 use Contao\Environment;
 use Contao\FrontendTemplate;
 use Contao\Pagination;
-use Contao\Template;
 use HeimrichHannot\HeadBundle\Tag\Link\LinkCanonical;
 use HeimrichHannot\HeadBundle\Tag\Link\LinkNext;
 use HeimrichHannot\HeadBundle\Tag\Link\LinkPrev;
@@ -324,7 +323,11 @@ class NewsPaginationManager
             $canonical = $this->linkCanonical->getContent();
 
             // canonical link must contain the current news url or not set
-            if ($config->addFullVersionCanonicalLink && $config->fullVersionGetParameter && (!$canonical || false !== strpos($canonical, urlencode($alias)))) {
+            if ($config->addFullVersionCanonicalLink && $config->fullVersionGetParameter) {
+                if ($canonical && false !== strpos($canonical, urlencode($alias))) {
+                    $url = $canonical;
+                }
+
                 $this->linkCanonical->setContent($this->urlUtil->addQueryString($config->fullVersionGetParameter.'=1', $url));
             }
 

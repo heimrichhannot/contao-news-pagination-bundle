@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.2.1] - 2020-06-18
+- respect already set canonical link (wrong bool comparison)
+
 ## [2.2.0] - 2020-05-15
 - class refactoring
 - added optional support for reader-bundle
