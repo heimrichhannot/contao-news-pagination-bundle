@@ -3,4 +3,19 @@ services:
     autowire: true
     public: true
 
-  HeimrichHannot\NewsPaginationBundle\Manager\NewsPaginationManager: ~
+  HeimrichHannot\NewsPaginationBundle\DataContainer\:
+    resource: '../../DataContainer/*'
+
+  HeimrichHannot\NewsPaginationBundle\Manager\:
+    resource: '../../Manager/*'
+
+  HeimrichHannot\NewsPaginationBundle\EventListener\:
+    resource: '../../EventListener/*'
+
+  HeimrichHannot\NewsPaginationBundle\EventListener\ReaderBeforeRenderEventListener:
+    tags:
+      - { name: kernel.event_listener, event: huh.reader.event.reader_before_render, method: addNewsPagination }
+
+  HeimrichHannot\NewsPaginationBundle\EventListener\ReaderModifyRetrievedItemEventListener:
+    tags:
+      - { name: kernel.event_listener, event: huh.reader.event.reader_modify_retrieved_item, method: __invoke }

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2020 Heimrich & Hannot GmbH
+ * Copyright (c) 2021 Heimrich & Hannot GmbH
  *
  * @license LGPL-3.0-or-later
  */
@@ -34,6 +34,10 @@ class Plugin implements BundlePluginInterface, ConfigPluginInterface
             $bundles[] = \HeimrichHannot\NewsBundle\HeimrichHannotContaoNewsBundle::class;
         }
 
+        if (class_exists('Hofff\Contao\ContentNavigation\HofffContentNavigationBundle')) {
+            $bundles[] = \Hofff\Contao\ContentNavigation\HofffContentNavigationBundle::class;
+        }
+
         return [
             BundleConfig::create(NewsPaginationBundle::class)
                 ->setLoadAfter($bundles),
@@ -43,7 +47,5 @@ class Plugin implements BundlePluginInterface, ConfigPluginInterface
     public function registerContainerConfiguration(LoaderInterface $loader, array $managerConfig)
     {
         $loader->load('@NewsPaginationBundle/Resources/config/services.yml');
-        $loader->load('@NewsPaginationBundle/Resources/config/listener.yml');
-        $loader->load('@NewsPaginationBundle/Resources/config/datacontainers.yml');
     }
 }

@@ -3,7 +3,8 @@
 /**
  * Hooks
  */
-$GLOBALS['TL_HOOKS']['parseArticles']['addNewsPagination'] = [\HeimrichHannot\NewsPaginationBundle\EventListener\HookListener::class, 'addNewsPagination'];
+$GLOBALS['TL_HOOKS']['parseArticles']['addNewsPagination'] = [\HeimrichHannot\NewsPaginationBundle\EventListener\ParseArticlesListener::class, '__invoke'];
+$GLOBALS['TL_HOOKS']['parseTemplate']['adjustHofffContentNavigation'] = [\HeimrichHannot\NewsPaginationBundle\EventListener\ParseTemplateListener::class, '__invoke'];
 
 /**
  * Content elements

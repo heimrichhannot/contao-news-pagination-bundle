@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2020 Heimrich & Hannot GmbH
+ * Copyright (c) 2021 Heimrich & Hannot GmbH
  *
  * @license LGPL-3.0-or-later
  */
@@ -12,7 +12,7 @@ use Contao\Module;
 use Contao\Template;
 use HeimrichHannot\NewsPaginationBundle\Manager\NewsPaginationManager;
 
-class HookListener
+class ParseArticlesListener
 {
     /**
      * @var NewsPaginationManager
@@ -24,7 +24,7 @@ class HookListener
         $this->manager = $manager;
     }
 
-    public function addNewsPagination(Template $template, array $article, Module $module)
+    public function __invoke(Template $template, array $article, Module $module)
     {
         $this->manager->addNewsPagination($template, $article, $module);
     }

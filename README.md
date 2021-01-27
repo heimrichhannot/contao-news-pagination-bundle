@@ -9,6 +9,7 @@ This bundle offers automatic content pagination for the core news reader module 
     - split news articles by an adjustable character amount respecting html tags
 - manual splitting
     - split news content by wrapping the content elements in special start and stop content elements
+- optional support for [hofff/contao-content-navigation](https://github.com/hofff/contao-content-navigation)
 
 ### Technical instructions
 

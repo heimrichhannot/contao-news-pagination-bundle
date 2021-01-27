@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.3.0] - 2021-01-27
+- added support for hofff/contao-content-navigation (if installed)
+- service refactoring
+
 ## [2.2.1] - 2020-06-18
 - respect already set canonical link (wrong bool comparison)
 
