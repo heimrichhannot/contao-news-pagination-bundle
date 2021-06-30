@@ -11,11 +11,23 @@ This bundle offers automatic content pagination for the core news reader module 
     - split news content by wrapping the content elements in special start and stop content elements
 - optional support for [hofff/contao-content-navigation](https://github.com/hofff/contao-content-navigation)
 
-### Technical instructions
+## Usage
 
-1. Activate "addPagination" in your news reader module and do the configuration there.
-2. Add `<?= $this->newsPagination ?>` to your details template (e.g. "news_full").
+### Setup
+
+1. Install with composer or contao manager
+
+        composer require heimrichhannot/contao-news-pagination-bundle
+
+1. Update database
+1. You'll find new configuration options in the news reader frontend module or your reader configuration
+1. Add `<?= $this->newsPagination ?>` to your details template (e.g. "news_full") to output the pagination navigation
 
 ### Known limitations for automatic pagination
 
 - currently only ce_text not nested in another content element (like an accordion) is supported for splitting, other elements are removed properly according to current page number though (completely)
+
+## Developers
+
+### PaginationUtil
+
