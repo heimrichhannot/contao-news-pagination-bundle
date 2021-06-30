@@ -31,3 +31,36 @@ This bundle offers automatic content pagination for the core news reader module 
 
 ### PaginationUtil
 
+The script to do the automatic pagination can be used by developers by using the `PaginationUtil`.
+
+Example:
+
+```php
+use HeimrichHannot\NewsPaginationBundle\Util\PaginationUtil;
+use Wa72\HtmlPageDom\HtmlPageCrawler;
+
+class ParseArticlesListener {
+    /** @var PaginationUtil */
+    protected $paginationUtil;
+    
+    public function __invoke(FrontendTemplate $template, array $newsEntry, Module $module) {
+        $result = $this->paginationUtil->paginateHtmlText($template->text, 500, 1, [
+                'selector' => '.ce_text_custom div.text',
+                'removePageElementsCallback' => function (array $result, int $currentPage, int $page) {
+                    // Always show page 1
+                    if (1 === $page) {
+                        return false;
+                    }
+                    // Insert custom html after page 3
+                    if (3 === $page) {
+                        $someCustomInsertion = new HtmlPageCrawler('<div class="alert">Custom Notice!</div>');
+                        $someCustomInsertion->insertAfter(end($result[$page])['element']);
+                    }
+                    // Remove all element not on the current page (default)
+                    return $page != $currentPage;
+                }
+            ]);
+    }
+}
+```
+

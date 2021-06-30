@@ -18,21 +18,16 @@ class PaginationUtil
      * Options:
      * - selector: (string) Override the container selector. Default: .ce_text
      * - avoidTrailingHeadlines: (bool) Set if trailing headlines should be avoided. Default true
+     * - removePageElementsCallback: (callable) A callback to evaluate if the elements of an page should be removed from result text. Default: `return $page != $currentPage`;
      *
-     * Returns an array with following keys:
-     * - text: (string) The text of the current page
-     * - currentPage: (int) The current page number
-     * - pageCount: (int) The number of pages
-     * - result: (array)
-     *
-     * Split example:
+     * @return PaginationResult an object containing all necessary result values
      */
     public function paginateHtmlText(string $html, int $limit, int $currentPage, array $options = []): PaginationResult
     {
         $defaults = [
             'selector' => '.ce_text',
             'avoidTrailingHeadlines' => true,
-            'removeElementsCallback' => function (array $result, int $currentPage, int $page, array $elements) { return $page != $currentPage; },
+            'removePageElementsCallback' => function (array $result, int $currentPage, int $page, array $elements) { return $page != $currentPage; },
         ];
         $options = array_merge($defaults, $options);
 
@@ -144,7 +139,7 @@ class PaginationUtil
         }
 
         foreach ($result as $page => $parts) {
-            if (true === $options['removeElementsCallback']($result, $currentPage, $page)) {
+            if (true === \call_user_func($options['removePageElementsCallback'], $result, $currentPage, $page)) {
                 foreach ($parts as $part) {
                     $part['element']->remove();
                 }
