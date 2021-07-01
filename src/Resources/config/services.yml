@@ -3,14 +3,8 @@ services:
     autowire: true
     public: true
 
-  HeimrichHannot\NewsPaginationBundle\DataContainer\:
-    resource: '../../DataContainer/*'
-
-  HeimrichHannot\NewsPaginationBundle\Manager\:
-    resource: '../../Manager/*'
-
-  HeimrichHannot\NewsPaginationBundle\EventListener\:
-    resource: '../../EventListener/*'
+  HeimrichHannot\NewsPaginationBundle\:
+    resource: '../../{DataContainer,EventListener,Manager,Util}/*'
 
   HeimrichHannot\NewsPaginationBundle\EventListener\ReaderBeforeRenderEventListener:
     tags:

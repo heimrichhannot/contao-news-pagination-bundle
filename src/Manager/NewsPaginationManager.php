@@ -16,6 +16,7 @@ use HeimrichHannot\HeadBundle\Tag\Link\LinkCanonical;
 use HeimrichHannot\HeadBundle\Tag\Link\LinkNext;
 use HeimrichHannot\HeadBundle\Tag\Link\LinkPrev;
 use HeimrichHannot\NewsPaginationBundle\NewsPaginationBundle;
+use HeimrichHannot\NewsPaginationBundle\Util\PaginationUtil;
 use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
 use HeimrichHannot\UtilsBundle\Pagination\TextualPagination;
 use HeimrichHannot\UtilsBundle\String\StringUtil;
@@ -34,6 +35,10 @@ class NewsPaginationManager
         'em',
         'div',
     ];
+    /**
+     * @var PaginationUtil
+     */
+    protected $paginationUtil;
     /**
      * @var LinkCanonical
      */
@@ -69,7 +74,8 @@ class NewsPaginationManager
         LinkNext $linkNext,
         UrlUtil $urlUtil,
         StringUtil $stringUtil,
-        Request $request
+        Request $request,
+        PaginationUtil $paginationUtil
     ) {
         $this->linkCanonical = $linkCanonical;
         $this->linkPrev = $linkPrev;
@@ -77,6 +83,7 @@ class NewsPaginationManager
         $this->urlUtil = $urlUtil;
         $this->stringUtil = $stringUtil;
         $this->request = $request;
+        $this->paginationUtil = $paginationUtil;
     }
 
     /**
@@ -172,130 +179,15 @@ class NewsPaginationManager
         $pageParam = 'page_n'.$config->id;
         $currentPage = is_numeric($this->request->getGet($pageParam)) && $this->request->getGet($pageParam) > 0 ? $this->request->getGet($pageParam) : 1;
 
-        $maxAmount = $config->paginationMaxCharCount;
-        $pageCount = 1;
+        $options = ['avoidTrailingHeadlines' => (bool) $config->avoidTrailingHeadlines];
 
-        // add wrapper div since remove() called on root elements doesn't work (bug?)
-        $node = new HtmlPageCrawler('<div><div class="news-pagination-content">'.\Contao\StringUtil::restoreBasicEntities($output->text).'</div></div>');
-        $textAmount = 0;
-        $ceTextCssSelector = $config->paginationCeTextCssSelector;
-        $tags = static::$tags;
-
-        // replace multiple br elements to
-        $node->filter('.news-pagination-content > [class*="ce_"]')->each(function ($element) use (&$textAmount, $maxAmount, $tags, $node, $ceTextCssSelector) {
-            if (false !== strpos($element->getAttribute('class'), 'ce_text') && false === strpos($element->html(), 'figure')) {
-                $element->children($ceTextCssSelector.', figure')->each(function ($paragraph) use (&$textAmount, $maxAmount, $tags) {
-                    $paragraph->html(preg_replace('@<br\s?\/?><br\s?\/?>@i', '</p><p>', $paragraph->html()));
-                });
-            }
-        });
-
-        // pagination
-        $node = new HtmlPageCrawler($node->saveHTML());
-        $elements = [];
-
-        // get relevant elements
-        $node->filter('.news-pagination-content > [class*="ce_"]')->each(function ($element) use (&$textAmount, $maxAmount, $tags, $node, $ceTextCssSelector, &$pageCount, &$elements) {
-            if (false !== strpos($element->getAttribute('class'), 'ce_text')
-                && false === strpos($element->html(), 'figure')) {
-                if ($ceTextCssSelector) {
-                    $element = $element->filter($ceTextCssSelector);
-                }
-
-                $element->children()->each(function ($element) use (&$intTextAmount, $textAmount, $tags, &$pageCount, &$elements) {
-                    $elements[] = [
-                        'element' => $element,
-                        'text' => trim($element->text()),
-                        'tag' => $element->nodeName(),
-                        'length' => \strlen($element->text()),
-                    ];
-                });
-            } else {
-                $elements[] = [
-                    'element' => $element,
-                    'text' => trim($element->text()),
-                    'tag' => $element->nodeName(),
-                    'length' => 0,
-                ];
-            }
-        });
-
-        // split array by text amounts
-        $splitted = [];
-
-        foreach ($elements as $element) {
-            $textAmountOrigin = $textAmount;
-            $textAmount += $element['length'];
-
-            if ($textAmount > $maxAmount && 0 != $textAmountOrigin) {
-                ++$pageCount;
-                $textAmount = $element['length'];
-            }
-
-            if (!isset($splitted[$pageCount])) {
-                $splitted[$pageCount] = [];
-            }
-
-            $splitted[$pageCount][] = $element;
+        if ($config->paginationCeTextCssSelector) {
+            $options['selector'] = $config->paginationCeTextCssSelector;
         }
 
-        // hold together headlines and paragraphs
-        if ($config->avoidTrailingHeadlines) {
-            $result = [];
+        $result = $this->paginationUtil->paginateHtmlText($output->text, $config->paginationMaxCharCount, $currentPage, $options);
 
-            foreach ($splitted as $page => $parts) {
-                $headlines = [];
-                $nonHeadlines = [];
-                $trailingHeadlines = true;
-
-                for ($i = \count($parts) - 1; $i > -1; --$i) {
-                    if ($trailingHeadlines && \in_array($parts[$i]['tag'], ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8', 'h9', 'h10'])) {
-                        $headlines[] = $parts[$i];
-                    } else {
-                        // break overlap handling if headline is not trailing
-                        $trailingHeadlines = false;
-                        $nonHeadlines[] = $parts[$i];
-                    }
-                }
-
-                if (empty($result[$page])) {
-                    $result[$page] = array_reverse($nonHeadlines);
-                } else {
-                    $result[$page] = array_merge($result[$page], array_reverse($nonHeadlines));
-                }
-
-                if (!empty($headlines)) {
-                    if (empty($result[$page + 1])) {
-                        $result[$page + 1] = array_reverse($headlines);
-                    } else {
-                        $result[$page + 1] = array_merge(array_reverse($headlines), $result[$page + 1]);
-                    }
-                }
-            }
-        } else {
-            $result = $splitted;
-        }
-
-        // can't be ;-)
-        if ($currentPage > $pageCount) {
-            $currentPage = $pageCount;
-        }
-
-        foreach ($result as $page => $parts) {
-            foreach ($parts as $part) {
-                if ($currentPage) {
-                    if ($page != $currentPage) {
-                        $part['element']->remove();
-                    }
-                } else {
-                    if (1 != $page) {
-                        $part['element']->remove();
-                    }
-                }
-            }
-        }
-
-        $output->text = str_replace(['%7B', '%7D'], ['{', '}'], $node->saveHTML());
+        $output->text = $result->getText();
 
         /* @var $objPage \Contao\PageModel */
         global $objPage;
@@ -311,10 +203,10 @@ class NewsPaginationManager
 
         // add pagination
         $singlePageUrl = $this->urlUtil->addQueryString($config->fullVersionGetParameter.'=1', $url);
-        $this->addPagination($output, $result, $config, $pageCount, $pageParam, $singlePageUrl);
+        $this->addPagination($output, $result->getPages(), $config, $result->getPageCount(), $pageParam, $singlePageUrl);
 
         // add head info
-        $this->handleMetaTags($pageCount, $currentPage, $pageParam, $config, $news['alias'], $url);
+        $this->handleMetaTags($result->getPageCount(), $currentPage, $pageParam, $config, $news['alias'], $url);
     }
 
     public function handleMetaTags(int $pageCount, int $currentPage, string $pageParam, $config, string $alias, string $url)
