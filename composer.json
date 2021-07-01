@@ -1,18 +1,13 @@
 {
   "name": "heimrichhannot/contao-news-pagination-bundle",
   "type": "contao-bundle",
-  "description": "This bundle offers content pagination for the news reader.",
-  "license": "LGPL-3.0+",
+  "description": "Automatic or manual content pagination for news or other content in contao.",
+  "license": "LGPL-3.0-or-later",
   "require": {
     "php": "^7.1",
     "contao/core-bundle": "^4.4",
     "wa72/htmlpagedom": "^1.3",
     "heimrichhannot/contao-head-bundle": "^1.0"
-  },
-  "require-dev": {
-    "contao/manager-plugin": "^2.0",
-    "phpunit/phpunit": "^4.5",
-    "symfony/phpunit-bridge": "^2.8|^3.0"
   },
   "autoload": {
     "psr-4": {
@@ -27,8 +22,6 @@
       "src/Resources/contao/languages/",
       "src/Resources/contao/templates/"
     ]
-  },
-  "autoload-dev": {
   },
   "config": {
     "preferred-install": "dist"

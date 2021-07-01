@@ -1,8 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [2.4.0] - 2021-06-30
-- 
+## [2.4.0] - 2021-07-01
+- Add pagination util ([#6])
+- increased minimum php version to 7.1
+- added license file and updated license
+- some cleanup
 
 ## [2.3.0] - 2021-01-27
 - added support for hofff/contao-content-navigation (if installed)
@@ -27,7 +30,7 @@ All notable changes to this project will be documented in this file.
 ## [2.1.9] - 2018-07-26
 
 ### Fixed
-- symfony 4 support, make service public, thanks to @Paddy0174 (https://github.com/heimrichhannot/contao-news-pagination-bundle/pull/1)
+- symfony 4 support, make service public, thanks to @Paddy0174 ([#1])
 
 ## [2.1.8] - 2018-07-26
 
@@ -100,37 +103,5 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - dependency from heimrichhannot/contao-haste_plus to heimrichhannot/contao-utils-bundle
 
-## [1.0.6] - 2018-01-17
-
-### Added
-- semaphore for manual vs. automatic pagination
-
-## [1.0.5] - 2017-12-06
-
-### Fixed
-- syntax error
-
-## [1.0.4] - 2017-12-06
-
-### Added
-- manual pagination
-
-## [1.0.3] - 2017-12-04
-
-### Fixed
-- entity escaping
-
-## [1.0.2] - 2017-10-20
-
-### Fixed
-- do not add `print` to canonical url if news was relocated
-
-## [1.0.1] - 2017-10-16
-
-### Fixed
-- namespace issues
-
-## [1.0.0] - 2017-10-13
-
-### Added
-- initial commit
+[#6]: https://github.com/heimrichhannot/contao-news-pagination-bundle/pull/6
+[#1]: https://github.com/heimrichhannot/contao-news-pagination-bundle/pull/1
