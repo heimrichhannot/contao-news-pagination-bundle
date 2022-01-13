@@ -40,9 +40,11 @@ class PaginationUtil
 
         // replace multiple br elements to
         $node->filter('.news-pagination-content > [class*="ce_"]')->each(function ($element) use (&$textAmount, $ceTextCssSelector) {
+            /** @var HtmlPageCrawler $element  */
             if (false !== strpos($element->getAttribute('class'), 'ce_text') && false === strpos($element->html(), 'figure')) {
                 $element->children($ceTextCssSelector.', figure')->each(function ($paragraph) use (&$textAmount) {
-                    $paragraph->html(preg_replace('@<br\s?\/?><br\s?\/?>@i', '</p><p>', $paragraph->html()));
+                    /** @var HtmlPageCrawler $paragraph  */
+                    $paragraph->setInnerHtml(preg_replace('@<br\s?\/?><br\s?\/?>@i', '</p><p>', $paragraph->html()));
                 });
             }
         });
@@ -60,17 +62,18 @@ class PaginationUtil
                 }
 
                 $element->children()->each(function ($element) use (&$intTextAmount, &$pageCount, &$elements) {
+                    /** @var HtmlPageCrawler $element  */
                     $elements[] = [
                         'element' => $element,
-                        'text' => trim($element->text()),
+                        'text' => trim($element->getCombinedText()),
                         'tag' => $element->nodeName(),
-                        'length' => \strlen($element->text()),
+                        'length' => \strlen($element->getCombinedText()),
                     ];
                 });
             } else {
                 $elements[] = [
                     'element' => $element,
-                    'text' => trim($element->text()),
+                    'text' => trim($element->getCombinedText()),
                     'tag' => $element->nodeName(),
                     'length' => 0,
                 ];

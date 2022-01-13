@@ -148,7 +148,7 @@ class NewsPaginationManager
 
             $teaserData[$intIndex] = [
                 [
-                    'text' => $element->getAttribute('data-pagination-title') ?: trim($element->text()),
+                    'text' => $element->getAttribute('data-pagination-title') ?: trim($element->getCombinedText()),
                 ],
             ];
 
