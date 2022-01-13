@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.5.1] - 2022-01-13
+- Fixed: w72/htmlpagedom v1 compatibility
+
 ## [2.5.0] - 2022-01-13
 - Changed: allow wa72/htmlpagedom v2
 

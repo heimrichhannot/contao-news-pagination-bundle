@@ -146,9 +146,15 @@ class NewsPaginationManager
         $startElements->each(function ($element) use ($page, &$pageCount, &$teaserData) {
             $intIndex = $element->getAttribute('data-index');
 
+            if (method_exists($element, 'getCombinedText')) {
+                $text = $element->getCombinedText();
+            } else {
+                $text = $element->text();
+            }
+
             $teaserData[$intIndex] = [
                 [
-                    'text' => $element->getAttribute('data-pagination-title') ?: trim($element->getCombinedText()),
+                    'text' => $element->getAttribute('data-pagination-title') ?: trim($text),
                 ],
             ];
 

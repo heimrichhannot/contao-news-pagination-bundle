@@ -54,6 +54,7 @@ class PaginationUtil
         $elements = [];
 
         // get relevant elements
+
         $node->filter('.news-pagination-content > [class*="ce_"]')->each(function ($element) use (&$textAmount, $ceTextCssSelector, &$pageCount, &$elements) {
             if (false !== strpos($element->getAttribute('class'), 'ce_text')
                 && false === strpos($element->html(), 'figure')) {
@@ -63,23 +64,34 @@ class PaginationUtil
 
                 $element->children()->each(function ($element) use (&$intTextAmount, &$pageCount, &$elements) {
                     /** @var HtmlPageCrawler $element  */
+                    if (method_exists($element, 'getCombinedText')) {
+                        $text = $element->getCombinedText();
+                    } else {
+                        $text = $element->text();
+                    }
+
+                    /** @var HtmlPageCrawler $element  */
                     $elements[] = [
                         'element' => $element,
-                        'text' => trim($element->getCombinedText()),
+                        'text' => trim($text),
                         'tag' => $element->nodeName(),
-                        'length' => \strlen($element->getCombinedText()),
+                        'length' => \strlen($text),
                     ];
                 });
             } else {
+                if (method_exists($element, 'getCombinedText')) {
+                    $text = $element->getCombinedText();
+                } else {
+                    $text = $element->text();
+                }
                 $elements[] = [
                     'element' => $element,
-                    'text' => trim($element->getCombinedText()),
+                    'text' => trim($text),
                     'tag' => $element->nodeName(),
                     'length' => 0,
                 ];
             }
         });
-
         // split array by text amounts
         $splitted = [];
 
