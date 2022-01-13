@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.5.0] - 2022-01-13
+- Changed: allow wa72/htmlpagedom v2
+
 ## [2.4.0] - 2021-07-01
 - Add pagination util ([#6])
 - increased minimum php version to 7.1
