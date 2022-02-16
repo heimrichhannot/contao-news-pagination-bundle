@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.5.2] - 2022-02-16
+
+- Fixed: user group issue
+
 ## [2.5.1] - 2022-01-13
 - Fixed: w72/htmlpagedom v1 compatibility
 
