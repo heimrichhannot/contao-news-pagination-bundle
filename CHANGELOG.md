@@ -2,6 +2,7 @@
 All notable changes to this project will be documented in this file.
 
 ## [2.5.3] - 2022-09-02
+- Changed: allow php 8
 - Fixed: inserttags with flags lead to empty strings
 
 ## [2.5.2] - 2022-02-16
