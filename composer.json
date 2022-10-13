@@ -12,19 +12,7 @@
   "autoload": {
     "psr-4": {
       "HeimrichHannot\\NewsPaginationBundle\\": "src/"
-    },
-    "classmap": [
-      "src/"
-    ],
-    "exclude-from-classmap": [
-      "src/Resources/contao/config/",
-      "src/Resources/contao/dca/",
-      "src/Resources/contao/languages/",
-      "src/Resources/contao/templates/"
-    ]
-  },
-  "config": {
-    "preferred-install": "dist"
+    }
   },
   "extra": {
     "contao-manager-plugin": "HeimrichHannot\\NewsPaginationBundle\\ContaoManager\\Plugin"

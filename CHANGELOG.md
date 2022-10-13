@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.5.4] - 2022-10-13
+- Fixed: compatibility problem with wa72/htmlpagedom v2
+
 ## [2.5.3] - 2022-09-02
 - Changed: allow php 8
 - Fixed: inserttags with flags lead to empty strings

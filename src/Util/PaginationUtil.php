@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2021 Heimrich & Hannot GmbH
+ * Copyright (c) 2022 Heimrich & Hannot GmbH
  *
  * @license LGPL-3.0-or-later
  */
@@ -40,10 +40,10 @@ class PaginationUtil
 
         // replace multiple br elements to
         $node->filter('.news-pagination-content > [class*="ce_"]')->each(function ($element) use (&$textAmount, $ceTextCssSelector) {
-            /** @var HtmlPageCrawler $element  */
+            /** @var HtmlPageCrawler $element */
             if (false !== strpos($element->getAttribute('class'), 'ce_text') && false === strpos($element->html(), 'figure')) {
                 $element->children($ceTextCssSelector.', figure')->each(function ($paragraph) use (&$textAmount) {
-                    /** @var HtmlPageCrawler $paragraph  */
+                    /* @var HtmlPageCrawler $paragraph  */
                     $paragraph->setInnerHtml(preg_replace('@<br\s?\/?><br\s?\/?>@i', '</p><p>', $paragraph->html()));
                 });
             }
@@ -56,28 +56,31 @@ class PaginationUtil
         // get relevant elements
 
         $node->filter('.news-pagination-content > [class*="ce_"]')->each(function ($element) use (&$textAmount, $ceTextCssSelector, &$pageCount, &$elements) {
+            /** @var HtmlPageCrawler $element */
             if (false !== strpos($element->getAttribute('class'), 'ce_text')
                 && false === strpos($element->html(), 'figure')) {
                 if ($ceTextCssSelector) {
                     $element = $element->filter($ceTextCssSelector);
                 }
 
-                $element->children()->each(function ($element) use (&$intTextAmount, &$pageCount, &$elements) {
-                    /** @var HtmlPageCrawler $element  */
-                    if (method_exists($element, 'getCombinedText')) {
-                        $text = $element->getCombinedText();
-                    } else {
-                        $text = $element->text();
-                    }
+                if ($element->count() > 0) {
+                    $element->children()->each(function ($element) use (&$intTextAmount, &$pageCount, &$elements) {
+                        /** @var HtmlPageCrawler $element */
+                        if (method_exists($element, 'getCombinedText')) {
+                            $text = $element->getCombinedText();
+                        } else {
+                            $text = $element->text();
+                        }
 
-                    /** @var HtmlPageCrawler $element  */
-                    $elements[] = [
-                        'element' => $element,
-                        'text' => trim($text),
-                        'tag' => $element->nodeName(),
-                        'length' => \strlen($text),
-                    ];
-                });
+                        /* @var HtmlPageCrawler $element  */
+                        $elements[] = [
+                            'element' => $element,
+                            'text' => trim($text),
+                            'tag' => $element->nodeName(),
+                            'length' => \strlen($text),
+                        ];
+                    });
+                }
             } else {
                 if (method_exists($element, 'getCombinedText')) {
                     $text = $element->getCombinedText();
