@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.5.5] - 2023-02-09
+- Changed: reduces database size usage in tl_module
+
 ## [2.5.4] - 2022-10-13
 - Fixed: compatibility problem with wa72/htmlpagedom v2
 
