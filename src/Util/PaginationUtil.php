@@ -157,7 +157,7 @@ class PaginationUtil
         }
 
         foreach ($result as $page => $parts) {
-            if (true === \call_user_func($options['removePageElementsCallback'], $result, $currentPage, $page)) {
+            if (true === \call_user_func($options['removePageElementsCallback'], $result, $currentPage, $page, $elements)) {
                 foreach ($parts as $part) {
                     $part['element']->remove();
                 }
