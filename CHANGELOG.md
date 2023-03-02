@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.5.6] - 2023-03-02
+- Fixed: missing parameter on user function call ([#7], [@cliffparnitzky])
+
 ## [2.5.5] - 2023-02-09
 - Changed: reduces database size usage in tl_module
 
@@ -122,5 +125,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - dependency from heimrichhannot/contao-haste_plus to heimrichhannot/contao-utils-bundle
 
+[@cliffparnitzky]: https://github.com/cliffparnitzky
+[#7]: https://github.com/heimrichhannot/contao-news-pagination-bundle/pull/7
 [#6]: https://github.com/heimrichhannot/contao-news-pagination-bundle/pull/6
 [#1]: https://github.com/heimrichhannot/contao-news-pagination-bundle/pull/1
