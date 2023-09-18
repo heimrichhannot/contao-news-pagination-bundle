@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.5.7] - 2023-09-18
+- Fixed: added missing dependencies ([#8])
+
 ## [2.5.6] - 2023-03-02
 - Fixed: missing parameter on user function call ([#7], [@cliffparnitzky])
 
@@ -126,6 +129,7 @@ All notable changes to this project will be documented in this file.
 - dependency from heimrichhannot/contao-haste_plus to heimrichhannot/contao-utils-bundle
 
 [@cliffparnitzky]: https://github.com/cliffparnitzky
-[#7]: https://github.com/heimrichhannot/contao-news-pagination-bundle/pull/7
-[#6]: https://github.com/heimrichhannot/contao-news-pagination-bundle/pull/6
 [#1]: https://github.com/heimrichhannot/contao-news-pagination-bundle/pull/1
+[#6]: https://github.com/heimrichhannot/contao-news-pagination-bundle/pull/6
+[#7]: https://github.com/heimrichhannot/contao-news-pagination-bundle/pull/7
+[#8]: https://github.com/heimrichhannot/contao-news-pagination-bundle/issues/8

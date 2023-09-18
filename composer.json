@@ -7,7 +7,9 @@
     "php": "^7.1 || ^8.0",
     "contao/core-bundle": "^4.4",
     "wa72/htmlpagedom": "^1.3 || ^2.0",
-    "heimrichhannot/contao-head-bundle": "^1.0"
+    "heimrichhannot/contao-head-bundle": "^1.0",
+    "heimrichhannot/contao-request-bundle": "^1.0",
+    "heimrichhannot/contao-utils-bundle": "^2.220"
   },
   "autoload": {
     "psr-4": {
